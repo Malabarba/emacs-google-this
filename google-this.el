@@ -4,7 +4,7 @@
 
 ;; Author: Artur Malabarba <bruce.connor.am@gmail.com>
 ;; URL: http://github.com/Bruce-Connor/emacs-google-this
-;; Version: 0.1
+;; Version: 1.0
 ;; Keywords: convenience hypermedia
 
 ;;; Commentary:
@@ -66,13 +66,12 @@ opposite happens."
   :group 'google-this)
 
 (define-prefix-command 'google-this-mode-submap)
+(define-key google-this-mode-submap [return] 'google-search)
+(define-key google-this-mode-submap "t" 'google-this) 
 (define-key google-this-mode-submap "w" 'google-word)
 (define-key google-this-mode-submap "s" 'google-symbol)
 (define-key google-this-mode-submap "l" 'google-line)
-(define-key google-this-mode-submap "t" 'google-this) 
 (define-key google-this-mode-submap "e" 'google-error) 
-(define-key google-this-mode-submap [return] 'google-search)
-
 
 (defvar google-url "https://www.google.com/search?q=%s"
   "URL to google searches.")
@@ -86,9 +85,11 @@ opposite happens."
                                 ("\"" "%22")
                                 ("[[:blank:]]+" "+")
                                 )
-  "List of (REGEXP REPLACEMENT) used by `parse-and-google-string'."
+  "List of (REGEXP REPLACEMENT) used by `parse-and-google-string'.
+You shouldn't have to edit this. If you are forced to edit this
+for some reason, contact me and let me know."
   :type '(repeat (list regexp string))
-  :group 'google-this)
+  :group 'google-this )
 
 (defun google-decide-url (prefix)
   "Decide whether to quote or not."
