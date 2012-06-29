@@ -107,10 +107,10 @@ opposite happens."
   "Convert illegal characters in TEXT to their %XX versions,
 and then google."
   (browse-url (replace-regexp-in-string "%s" 
-                            (dolist (rp url-parser-regexps text)
-                              (setq text (replace-regexp-in-string
-                                          (car rp) (car (cdr rp)) text)))
-                            (google-decide-url prefix))))
+                                        (dolist (rp url-parser-regexps text)
+                                          (setq text (replace-regexp-in-string
+                                                      (car rp) (car (cdr rp)) text)))
+                                        (google-decide-url prefix))))
 
 (defun google-string (prefix &optional TEXT NOCONFIRM)
   "Google given TEXT, but ask the user first if NOCONFIRM is nil."
@@ -168,3 +168,7 @@ and then google."
                       "^[^:]*:[0-9 ]*:[0-9 ]*: *"
                       ""
                       (buffer-substring (line-beginning-position) (line-end-position))) prefix))))
+
+(provide 'google-this)
+
+;;; google-this.el ends here
