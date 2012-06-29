@@ -52,6 +52,10 @@
 
 ;;; Code:
 
+
+(defgroup google-this '()
+  "Customization group for `google-this-mode'.")
+
 (defcustom google-wrap-in-quotes nil
   "If not nil, searches are wrapped in double quotes.
 
@@ -60,14 +64,14 @@ opposite happens."
   :type 'boolean
   :group 'google-this)
 
-(define-prefix-command 'google-this-mode-sub-map)
-(global-set-key (kbd "C-x g") 'google-this-mode-sub-map)
-(define-key google-this-mode-sub-map "w" 'google-word)
-(define-key google-this-mode-sub-map "s" 'google-symbol)
-(define-key google-this-mode-sub-map "l" 'google-line)
-(define-key google-this-mode-sub-map "t" 'google-this) 
-(define-key google-this-mode-sub-map "e" 'google-error) 
-(define-key google-this-mode-sub-map (kbd "<return>") 'google-search)
+(define-prefix-command 'google-this-mode-submap)
+(define-key google-this-mode-submap "w" 'google-word)
+(define-key google-this-mode-submap "s" 'google-symbol)
+(define-key google-this-mode-submap "l" 'google-line)
+(define-key google-this-mode-submap "t" 'google-this) 
+(define-key google-this-mode-submap "e" 'google-error) 
+(define-key google-this-mode-submap [return] 'google-search)
+
 
 (defvar google-url "https://www.google.com/search?q=%s"
   "URL to google searches.")
@@ -75,12 +79,15 @@ opposite happens."
 (defvar google-quoted-url "https://www.google.com/search?q=%22%s%22"
   "URL to quoted google searches.")
 
-(defvar url-parser-regexps '(
-                             ("&" "%26")
-                             ("\"" "%22")
-                             ("[[:blank:]]+" "+")
-                             )
-  "List of (REGEXP REPLACEMENT) used by `parse-and-google-string'.")
+
+(defcustom url-parser-regexps '(
+                                ("&" "%26")
+                                ("\"" "%22")
+                                ("[[:blank:]]+" "+")
+                                )
+  "List of (REGEXP REPLACEMENT) used by `parse-and-google-string'."
+  :type '(repeat (list regexp string))
+  :group 'google-this)
 
 (defun google-decide-url (prefix)
   "Decide whether to quote or not."
@@ -168,6 +175,14 @@ and then google."
                       "^[^:]*:[0-9 ]*:[0-9 ]*: *"
                       ""
                       (buffer-substring (line-beginning-position) (line-end-position))) prefix))))
+
+
+;;;###autoload
+(define-minor-mode google-this-mode nil nil " Google"
+  `(("g" . ,google-this-mode-submap))
+  :global t
+  :group 'google-this)
+
 
 (provide 'google-this)
 
