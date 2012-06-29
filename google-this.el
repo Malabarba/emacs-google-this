@@ -60,14 +60,14 @@ opposite happens."
   :type 'boolean
   :group 'google-this)
 
-(define-prefix-command 'google-this-map)
-(global-set-key (kbd "C-x g") 'google-this-map)
-(define-key google-this-map "w" 'google-word)
-(define-key google-this-map "s" 'google-symbol)
-(define-key google-this-map "l" 'google-line)
-(define-key google-this-map "t" 'google-this) 
-(define-key google-this-map "e" 'google-error) 
-(define-key google-this-map (kbd "<return>") 'google-search)
+(define-prefix-command 'google-this-mode-sub-map)
+(global-set-key (kbd "C-x g") 'google-this-mode-sub-map)
+(define-key google-this-mode-sub-map "w" 'google-word)
+(define-key google-this-mode-sub-map "s" 'google-symbol)
+(define-key google-this-mode-sub-map "l" 'google-line)
+(define-key google-this-mode-sub-map "t" 'google-this) 
+(define-key google-this-mode-sub-map "e" 'google-error) 
+(define-key google-this-mode-sub-map (kbd "<return>") 'google-search)
 
 (defvar google-url "https://www.google.com/search?q=%s"
   "URL to google searches.")
