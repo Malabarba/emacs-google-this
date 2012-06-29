@@ -14,7 +14,8 @@
 
 ;; The main function is `google-this' (bound to C-x g t). It does a
 ;; google search using the currently selected region, or the
-;; expression under point. All functions are bound under "C-x g".
+;; expression under point. All functions are bound under "C-x g", to
+;; see all keybindings type "C-x g C-h".
 
 ;; To start a blank search, do `google-search' (C-x g RET). If you
 ;; want more control of what "under point" means, there are the
