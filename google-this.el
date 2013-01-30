@@ -37,7 +37,7 @@
 
 ;; INSTALLATION
 
-;;	Make sure "google-this.el" is in your load path, then place
+;;  Make sure "google-this.el" is in your load path, then place
 ;; 	this code in your .emacs file:
 ;;		(require 'google-this)
 ;; 		(google-this-mode 1)
@@ -72,6 +72,7 @@ opposite happens."
 (define-key google-this-mode-submap "s" 'google-symbol)
 (define-key google-this-mode-submap "l" 'google-line)
 (define-key google-this-mode-submap "e" 'google-error) 
+(define-key google-this-mode-submap "r" 'google-cpp-reference) 
 
 (defvar google-url "https://www.google.com/search?q=%s"
   "URL to google searches.")
@@ -81,8 +82,11 @@ opposite happens."
 
 
 (defcustom url-parser-regexps '(
+                                ("%" "%25")
+                                ("\\+" "%2B")
                                 ("&" "%26")
                                 ("\"" "%22")
+                                ("/" "%2F")
                                 ("[[:blank:]]+" "+")
                                 )
   "List of (REGEXP REPLACEMENT) used by `parse-and-google-string'.
@@ -102,24 +106,25 @@ for some reason, contact me and let me know."
   (interactive "P")
   (let ((TEXT (replace-regexp-in-string
                "^\\s-+" ""
-               (cond
-                ((thing-at-point 'symbol) (thing-at-point 'symbol))
-                ((thing-at-point 'word) (thing-at-point 'word))
-                (t (buffer-substring-no-properties (line-beginning-position)
-                                                   (line-end-position)))))))
+               (or (thing-at-point 'symbol)
+                   (thing-at-point 'word)
+                   (buffer-substring-no-properties (line-beginning-position)
+                                                   (line-end-position))))))
     (setq TEXT (read-string (concat "Googling [" TEXT "]: ") nil nil TEXT))
     (if (stringp TEXT)
         (parse-and-google-string TEXT prefix)
       (message "[google-string] Empty query."))))
 
-(defun parse-and-google-string (text prefix)
+(defun parse-and-google-string (text prefix &optional url-decider)
   "Convert illegal characters in TEXT to their %XX versions,
 and then google."
-  (browse-url (replace-regexp-in-string "%s" 
-                                        (dolist (rp url-parser-regexps text)
-                                          (setq text (replace-regexp-in-string
-                                                      (car rp) (car (cdr rp)) text)))
-                                        (google-decide-url prefix))))
+  (unless url-decider (setq url-decider 'google-decide-url))
+  (browse-url (replace-regexp-in-string
+               "%s" 
+               (dolist (rp url-parser-regexps text)
+                 (setq text (replace-regexp-in-string
+                             (car rp) (car (cdr rp)) text)))
+               (funcall url-decider prefix))))
 
 (defun google-string (prefix &optional TEXT NOCONFIRM)
   "Google given TEXT, but ask the user first if NOCONFIRM is nil."
@@ -173,11 +178,18 @@ and then google."
           (buffer-name (next-error-find-buffer)))
       (unless (compilation-buffer-internal-p)
         (set-buffer buffer-name))
-      (google-string (replace-regexp-in-string
-                      "^[^:]*:[0-9 ]*:[0-9 ]*: *"
-                      ""
-                      (buffer-substring (line-beginning-position) (line-end-position))) prefix))))
+      (google-string prefix
+                     (replace-regexp-in-string "^[^:]*:[0-9 ]*:\\([0-9 ]*:\\)? *" ""
+                      (buffer-substring (line-beginning-position) (line-end-position)))))))
 
+(defun google-cpp-reference ()
+  "Visit the most probable cppreference.com page for this word."
+  (interactive)
+  (parse-and-google-string (concat "site:cppreference.com " (thing-at-point 'symbol)) nil 'google-feeling-lucky-decider))
+
+(defun google-feeling-lucky-decider (prefix)
+  "Just returns the feeling lucky url."
+  "http://www.google.com/search?btnI=I'm Feeling Lucky&q=%s")
 
 ;;;###autoload
 (define-minor-mode google-this-mode nil nil " Google"
