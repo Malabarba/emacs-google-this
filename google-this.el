@@ -193,7 +193,7 @@ and then google."
 
 ;;;###autoload
 (define-minor-mode google-this-mode nil nil " Google"
-  `(("g" . ,google-this-mode-submap))
+  `((,(kbd "C-c /") . ,google-this-mode-submap))
   :global t
   :group 'google-this)
 
