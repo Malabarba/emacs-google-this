@@ -91,13 +91,17 @@ launched (calls `suspend-frame')."
 (define-key google-this-mode-submap "f" 'google-forecast)
 (define-key google-this-mode-submap "r" 'google-cpp-reference) 
 (define-key google-this-mode-submap "m" 'google-maps)
+;; "c" is for "convert language" :-P
+(define-key google-this-mode-submap "c" 'google-translate-query-or-region)
+
 (defun google-translate-query-or-region ()
   "If region is active `google-translate-at-point', otherwise `google-translate-query-translate'."
   (interactive)
+  (unless (functionp 'google-translate-at-point)
+    (error "[google-this]: This command requires the 'google-translate' package."))
   (if (region-active-p)
       (call-interactively 'google-translate-at-point)
     (call-interactively 'google-translate-query-translate)))
-(define-key google-this-mode-submap "t" 'google-translate-query-or-region)
 
 (defcustom google-location-suffix "com"
   "The url suffix associated with your location (com, co.uk, fr, etc)."
