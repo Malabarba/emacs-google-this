@@ -58,7 +58,9 @@
 ;; 
 
 ;;; Change Log:
-;; 20130504 -- Changed the keybinding to be standards compliant.
+;; 2013-05-04 -- Changed the keybinding to be standards compliant.
+;; 2013-03-03 -- Fixed problem with backslash.
+;; 2013-02-27 -- Added support for google-translate and google-maps packages. And added `google-forecast' function. And added `google-location-suffix' so we're not constrained to google.com anymore.
 ;;; Code:
 
 
@@ -73,6 +75,12 @@ opposite happens."
   :type 'boolean
   :group 'google-this)
 
+(defcustom google-this-suspend-after-search nil
+  "Whether emacs should be minimized after a search is
+launched (calls `suspend-frame')."
+  :type 'boolean
+  :group 'google-this)
+
 (define-prefix-command 'google-this-mode-submap)
 (define-key google-this-mode-submap [return] 'google-search)
 (define-key google-this-mode-submap "t" 'google-this) 
@@ -80,13 +88,27 @@ opposite happens."
 (define-key google-this-mode-submap "s" 'google-symbol)
 (define-key google-this-mode-submap "l" 'google-line)
 (define-key google-this-mode-submap "e" 'google-error) 
+(define-key google-this-mode-submap "f" 'google-forecast)
 (define-key google-this-mode-submap "r" 'google-cpp-reference) 
+(define-key google-this-mode-submap "m" 'google-maps)
+(defun google-translate-query-or-region ()
+  "If region is active `google-translate-at-point', otherwise `google-translate-query-translate'."
+  (interactive)
+  (if (region-active-p)
+      (call-interactively 'google-translate-at-point)
+    (call-interactively 'google-translate-query-translate)))
+(define-key google-this-mode-submap "t" 'google-translate-query-or-region)
 
-(defvar google-url "https://www.google.com/search?q=%s"
-  "URL to google searches.")
+(defcustom google-location-suffix "com"
+  "The url suffix associated with your location (com, co.uk, fr, etc)."
+  :type 'string
+  :group 'google-this)
 
-(defvar google-quoted-url "https://www.google.com/search?q=%22%s%22"
-  "URL to quoted google searches.")
+(defun google-url () "URL to google searches."
+  (concat "https://www.google." google-location-suffix "/search?q=%s"))
+
+(defun google-quoted-url () "URL to quoted google searches."
+  (concat "https://www.google." google-location-suffix "/search?q=%22%s%22"))
 
 
 (defcustom url-parser-regexps '(
@@ -95,6 +117,7 @@ opposite happens."
                                 ("&" "%26")
                                 ("\"" "%22")
                                 ("/" "%2F")
+                                ("\\\\" "\\\\\\\\")
                                 ("[[:blank:]]+" "+")
                                 )
   "List of (REGEXP REPLACEMENT) used by `parse-and-google-string'.
@@ -106,18 +129,20 @@ for some reason, contact me and let me know."
 (defun google-decide-url (prefix)
   "Decide whether to quote or not."
   (if (if prefix (not google-wrap-in-quotes) google-wrap-in-quotes)
-      google-quoted-url
-    google-url))
+      (google-quoted-url)
+    (google-url)))
 
 (defun google-search (prefix)
   "Write and do a google search."
   (interactive "P")
   (let ((TEXT (replace-regexp-in-string
                "^\\s-+" ""
-               (or (thing-at-point 'symbol)
-                   (thing-at-point 'word)
-                   (buffer-substring-no-properties (line-beginning-position)
-                                                   (line-end-position))))))
+               (if (region-active-p)
+                   (buffer-substring-no-properties (region-beginning) (region-end))
+                 (or (thing-at-point 'symbol)
+                     (thing-at-point 'word)
+                     (buffer-substring-no-properties (line-beginning-position)
+                                                     (line-end-position)))) )))
     (setq TEXT (read-string (concat "Googling [" TEXT "]: ") nil nil TEXT))
     (if (stringp TEXT)
         (parse-and-google-string TEXT prefix)
@@ -132,7 +157,9 @@ and then google."
                (dolist (rp url-parser-regexps text)
                  (setq text (replace-regexp-in-string
                              (car rp) (car (cdr rp)) text)))
-               (funcall url-decider prefix))))
+               (funcall url-decider prefix)))
+  (when google-this-suspend-after-search
+    (suspend-frame)))
 
 (defun google-string (prefix &optional TEXT NOCONFIRM)
   "Google given TEXT, but ask the user first if NOCONFIRM is nil."
@@ -165,13 +192,13 @@ and then google."
   "Google the current region."
   (interactive "P")
   (google-string
-   (buffer-substring-no-properties (region-beginning) (region-end)) prefix))
+   prefix (buffer-substring-no-properties (region-beginning) (region-end))))
 
 (defun google-this (prefix)
   "Description"
   (interactive "P")
   (cond
-   ((use-region-p) (google-region prefix))
+   ((region-active-p) (google-region prefix))
    ((thing-at-point 'symbol) (google-string prefix (thing-at-point 'symbol)))
    ((thing-at-point 'word) (google-string prefix (thing-at-point 'word)))
    (t (google-line prefix))))
@@ -197,7 +224,13 @@ and then google."
 
 (defun google-feeling-lucky-decider (prefix)
   "Just returns the feeling lucky url."
-  "http://www.google.com/search?btnI=I'm Feeling Lucky&q=%s")
+  (concat "https://www.google." google-location-suffix "/search?btnI=I'm Feeling Lucky&q=%s"))
+
+(defun google-forecast (prefix)
+  "Just searches google for \"weather\"."
+  (interactive "P")
+  (if (not prefix) (parse-and-google-string "weather" nil)
+    (parse-and-google-string (concat "weather" (read-string "Location: " nil nil ""))) nil))
 
 ;;;###autoload
 (define-minor-mode google-this-mode nil nil " Google"
