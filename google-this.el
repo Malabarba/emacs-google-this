@@ -58,6 +58,7 @@
 ;; 
 
 ;;; Change Log:
+;; 1.2 - 20130421 - Fixed docs.
 ;; 2013-05-04 -- Changed the keybinding to be standards compliant.
 ;; 2013-03-03 -- Fixed problem with backslash.
 ;; 2013-02-27 -- Added support for google-translate and google-maps packages. And added `google-forecast' function. And added `google-location-suffix' so we're not constrained to google.com anymore.
@@ -76,8 +77,7 @@ opposite happens."
   :group 'google-this)
 
 (defcustom google-this-suspend-after-search nil
-  "Whether emacs should be minimized after a search is
-launched (calls `suspend-frame')."
+  "Whether emacs should be minimized after a search is launched (calls `suspend-frame')."
   :type 'boolean
   :group 'google-this)
 
@@ -125,6 +125,7 @@ launched (calls `suspend-frame')."
                                 ("[[:blank:]]+" "+")
                                 )
   "List of (REGEXP REPLACEMENT) used by `parse-and-google-string'.
+
 You shouldn't have to edit this. If you are forced to edit this
 for some reason, contact me and let me know."
   :type '(repeat (list regexp string))
@@ -153,8 +154,7 @@ for some reason, contact me and let me know."
       (message "[google-string] Empty query."))))
 
 (defun parse-and-google-string (text prefix &optional url-decider)
-  "Convert illegal characters in TEXT to their %XX versions,
-and then google."
+  "Convert illegal characters in TEXT to their %XX versions, and then google."
   (unless url-decider (setq url-decider 'google-decide-url))
   (browse-url (replace-regexp-in-string
                "%s" 
@@ -199,7 +199,11 @@ and then google."
    prefix (buffer-substring-no-properties (region-beginning) (region-end))))
 
 (defun google-this (prefix)
-  "Description"
+  "Automatically decide what the user wants to google (always something under point).
+
+Unlike `google-search' (which presents an empty prompt with
+\"this\" as the default value), this function inserts the query
+in the minibuffer to be edited."
   (interactive "P")
   (cond
    ((region-active-p) (google-region prefix))
