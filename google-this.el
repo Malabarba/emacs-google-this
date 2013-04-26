@@ -4,7 +4,7 @@
 
 ;; Author: Artur Malabarba <bruce.connor.am@gmail.com>
 ;; URL: http://github.com/Bruce-Connor/emacs-google-this
-;; Version: 1.0
+;; Version: 1.2.1
 ;; Keywords: convenience hypermedia
 
 ;;; Commentary:
@@ -58,6 +58,8 @@
 ;; 
 
 ;;; Change Log:
+;; 1.2.1 - 20130426 - Created an error parser for the google-error function. It works with c-like errors and is extendable to other types of errors using the varible `google-error-regexp'.
+;; 1.2.1 - 20130426 - autoloaded any functions that the user might want to call directly.
 ;; 1.2 - 20130421 - Fixed docs.
 ;; 2013-05-04 -- Changed the keybinding to be standards compliant.
 ;; 2013-03-03 -- Fixed problem with backslash.
@@ -67,7 +69,10 @@
 
 (defgroup google-this '()
   "Customization group for `google-this-mode'.")
-
+(defconst google-this-version "1.2.1"
+  "Version string of the `google-this' package.")
+(defconst google-this-version-int 2
+  "Integer version number of the `google-this' package (for comparing versions).")
 (defcustom google-wrap-in-quotes nil
   "If not nil, searches are wrapped in double quotes.
 
@@ -131,12 +136,19 @@ for some reason, contact me and let me know."
   :type '(repeat (list regexp string))
   :group 'google-this )
 
+(defcustom google-error-regexp '(("^[^:]*:[0-9 ]*:\\([0-9 ]*:\\)? *" ""))
+  "List of (REGEXP REPLACEMENT) pairs to parse error strings."
+  :type '(repeat (list regexp string))
+  :group 'google-this)
+
+
 (defun google-decide-url (prefix)
   "Decide whether to quote or not."
   (if (if prefix (not google-wrap-in-quotes) google-wrap-in-quotes)
       (google-quoted-url)
     (google-url)))
 
+;;;###autoload
 (defun google-search (prefix)
   "Write and do a google search."
   (interactive "P")
@@ -165,6 +177,7 @@ for some reason, contact me and let me know."
   (when google-this-suspend-after-search
     (suspend-frame)))
 
+;;;###autoload
 (defun google-string (prefix &optional TEXT NOCONFIRM)
   "Google given TEXT, but ask the user first if NOCONFIRM is nil."
   (interactive)
@@ -175,29 +188,34 @@ for some reason, contact me and let me know."
       (parse-and-google-string TEXT prefix)
     (message "[google-string] Empty query.")))
 
+;;;###autoload
 (defun google-line (prefix)
   "Google the current line."
   (interactive "P")
   (let ((Line (buffer-substring (line-beginning-position) (line-end-position))))
     (google-string prefix Line)))
 
+;;;###autoload
 (defun google-word (prefix)
   "Google the current word."
   (interactive "P")
   (google-string prefix (thing-at-point 'word) t))
 
+;;;###autoload
 (defun google-symbol (prefix)
   "Google the current symbol."
   (interactive "P")
   (google-string prefix (thing-at-point 'symbol) t))
 
 
+;;;###autoload
 (defun google-region (prefix)
   "Google the current region."
   (interactive "P")
   (google-string
    prefix (buffer-substring-no-properties (region-beginning) (region-end))))
 
+;;;###autoload
 (defun google-this (prefix)
   "Automatically decide what the user wants to google (always something under point).
 
@@ -211,6 +229,7 @@ in the minibuffer to be edited."
    ((thing-at-point 'word) (google-string prefix (thing-at-point 'word)))
    (t (google-line prefix))))
 
+;;;###autoload
 (defun google-error (prefix)
   "Google the current error in the compilation buffer."
   (interactive "P")
@@ -222,9 +241,28 @@ in the minibuffer to be edited."
       (unless (compilation-buffer-internal-p)
         (set-buffer buffer-name))
       (google-string prefix
-                     (replace-regexp-in-string "^[^:]*:[0-9 ]*:\\([0-9 ]*:\\)? *" ""
+                     (google-this-clean-error-string 
                       (buffer-substring (line-beginning-position) (line-end-position)))))))
 
+
+;;;###autoload
+(defun google-this-clean-error-string (s)
+  "Parse error strings and turn them into googleable strings.
+
+Removes unhelpful details like file names and line numbers from
+simple error strings (such as c-like erros).
+
+Uses replacements in `google-error-regexp' and stops at the first match."
+  (interactive)
+  (dolist (cur google-error-regexp out)
+    (when (string-match (car cur) s)
+        (setq out 
+              (replace-regexp-in-string  (car cur)
+                                         (car (cdr cur))
+                                         s))
+        (return out))))
+
+;;;###autoload
 (defun google-cpp-reference ()
   "Visit the most probable cppreference.com page for this word."
   (interactive)
@@ -234,6 +272,7 @@ in the minibuffer to be edited."
   "Just returns the feeling lucky url."
   (concat "https://www.google." google-location-suffix "/search?btnI=I'm Feeling Lucky&q=%s"))
 
+;;;###autoload
 (defun google-forecast (prefix)
   "Just searches google for \"weather\"."
   (interactive "P")
