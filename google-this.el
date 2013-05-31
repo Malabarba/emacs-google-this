@@ -4,7 +4,7 @@
 
 ;; Author: Artur Malabarba <bruce.connor.am@gmail.com>
 ;; URL: http://github.com/Bruce-Connor/emacs-google-this
-;; Version: 1.2.1
+;; Version: 1.3
 ;; Keywords: convenience hypermedia
 
 ;;; Commentary:
@@ -58,6 +58,8 @@
 ;; 
 
 ;;; Change Log:
+;; 1.3 - 20130531 - Merged fix for google-forecast. Thanks to ptrv.
+;; 1.3 - 20130531 - More robust google-translate command.
 ;; 1.2.1 - 20130426 - Created an error parser for the google-error function. It works with c-like errors and is extendable to other types of errors using the varible `google-error-regexp'.
 ;; 1.2.1 - 20130426 - autoloaded any functions that the user might want to call directly.
 ;; 1.2 - 20130421 - Fixed docs.
@@ -69,9 +71,9 @@
 
 (defgroup google-this '()
   "Customization group for `google-this-mode'.")
-(defconst google-this-version "1.2.1"
+(defconst google-this-version "1.3"
   "Version string of the `google-this' package.")
-(defconst google-this-version-int 2
+(defconst google-this-version-int 3
   "Integer version number of the `google-this' package (for comparing versions).")
 (defcustom google-wrap-in-quotes nil
   "If not nil, searches are wrapped in double quotes.
@@ -102,11 +104,15 @@ opposite happens."
 (defun google-translate-query-or-region ()
   "If region is active `google-translate-at-point', otherwise `google-translate-query-translate'."
   (interactive)
-  (unless (functionp 'google-translate-at-point)
+  (unless (require 'google-translate nil t)
     (error "[google-this]: This command requires the 'google-translate' package."))
   (if (region-active-p)
-      (call-interactively 'google-translate-at-point)
-    (call-interactively 'google-translate-query-translate)))
+      (if (functionp 'google-translate-at-point)
+          (call-interactively 'google-translate-at-point)
+        (error "[google-this]: `google-translate-at-point' function not found in `google-translate' package."))
+    (if (functionp 'google-translate-query-translate)
+        (call-interactively 'google-translate-query-translate)
+      (error "[google-this]: `google-translate-query-translate' function not found in `google-translate' package."))))
 
 (defcustom google-location-suffix "com"
   "The url suffix associated with your location (com, co.uk, fr, etc)."
