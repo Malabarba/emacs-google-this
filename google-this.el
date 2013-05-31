@@ -277,7 +277,7 @@ Uses replacements in `google-error-regexp' and stops at the first match."
   "Just searches google for \"weather\"."
   (interactive "P")
   (if (not prefix) (parse-and-google-string "weather" nil)
-    (parse-and-google-string (concat "weather" (read-string "Location: " nil nil ""))) nil))
+    (parse-and-google-string (concat "weather " (read-string "Location: " nil nil "")) nil)))
 
 ;;;###autoload
 (define-minor-mode google-this-mode nil nil " Google"
