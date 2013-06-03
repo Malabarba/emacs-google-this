@@ -4,7 +4,7 @@
 
 ;; Author: Artur Malabarba <bruce.connor.am@gmail.com>
 ;; URL: http://github.com/Bruce-Connor/emacs-google-this
-;; Version: 1.3
+;; Version: 1.4
 ;; Keywords: convenience hypermedia
 
 ;;; Commentary:
@@ -58,6 +58,9 @@
 ;; 
 
 ;;; Change Log:
+;; 1.4 - 20130603 - Added parent groups.
+;; 1.4 - 20130603 - Renamed some functions and variables. Is backwards incompatible if you were using functions you shouldn't be.
+;; 1.4 - 20130603 - Fixed quoting.
 ;; 1.3 - 20130531 - Merged fix for google-forecast. Thanks to ptrv.
 ;; 1.3 - 20130531 - More robust google-translate command.
 ;; 1.2.1 - 20130426 - Created an error parser for the google-error function. It works with c-like errors and is extendable to other types of errors using the varible `google-error-regexp'.
@@ -70,10 +73,13 @@
 
 
 (defgroup google-this '()
-  "Customization group for `google-this-mode'.")
-(defconst google-this-version "1.3"
+  "Customization group for `google-this-mode'."
+  :link '(url-link "http://github.com/Bruce-Connor/emacs-google-this")
+  :group 'convenience
+  :group 'comm)
+(defconst google-this-version "1.4"
   "Version string of the `google-this' package.")
-(defconst google-this-version-int 3
+(defconst google-this-version-int 4
   "Integer version number of the `google-this' package (for comparing versions).")
 (defcustom google-wrap-in-quotes nil
   "If not nil, searches are wrapped in double quotes.
@@ -122,11 +128,12 @@ opposite happens."
 (defun google-url () "URL to google searches."
   (concat "https://www.google." google-location-suffix "/search?q=%s"))
 
-(defun google-quoted-url () "URL to quoted google searches."
+(defun google-quoted-url () "OBSOLETE
+URL to quoted google searches."
   (concat "https://www.google." google-location-suffix "/search?q=%22%s%22"))
 
 
-(defcustom url-parser-regexps '(
+(defcustom google-this-url-parser-regexps '(
                                 ("%" "%25")
                                 ("\\+" "%2B")
                                 ("&" "%26")
@@ -135,7 +142,7 @@ opposite happens."
                                 ("\\\\" "\\\\\\\\")
                                 ("[[:blank:]]+" "+")
                                 )
-  "List of (REGEXP REPLACEMENT) used by `parse-and-google-string'.
+  "List of (REGEXP REPLACEMENT) used by `google-this-parse-and-search-string'.
 
 You shouldn't have to edit this. If you are forced to edit this
 for some reason, contact me and let me know."
@@ -148,10 +155,16 @@ for some reason, contact me and let me know."
   :group 'google-this)
 
 
-(defun google-decide-url (prefix)
-  "Decide whether to quote or not."
-  (if (if prefix (not google-wrap-in-quotes) google-wrap-in-quotes)
-      (google-quoted-url)
+(defun google-this-decide-url (&optional dummy)
+  "Decide which url to use.
+
+This used to be for quoting, now quoting is done differently but
+we are keeping it for possible future plans. DUMMY is not supposed to be used, currently."
+  ;; (if (if prefix (not google-wrap-in-quotes) google-wrap-in-quotes)
+  ;;     (google-quoted-url)
+  ;;   (google-url))
+  (if (stringp dummy)
+      dummy
     (google-url)))
 
 ;;;###autoload
@@ -168,30 +181,45 @@ for some reason, contact me and let me know."
                                                      (line-end-position)))) )))
     (setq TEXT (read-string (concat "Googling [" TEXT "]: ") nil nil TEXT))
     (if (stringp TEXT)
-        (parse-and-google-string TEXT prefix)
+        (google-this-parse-and-search-string TEXT prefix)
       (message "[google-string] Empty query."))))
 
-(defun parse-and-google-string (text prefix &optional url-decider)
-  "Convert illegal characters in TEXT to their %XX versions, and then google."
-  (unless url-decider (setq url-decider 'google-decide-url))
-  (browse-url (replace-regexp-in-string
-               "%s" 
-               (dolist (rp url-parser-regexps text)
-                 (setq text (replace-regexp-in-string
-                             (car rp) (car (cdr rp)) text)))
-               (funcall url-decider prefix)))
-  (when google-this-suspend-after-search
-    (suspend-frame)))
+(defun google-this-parse-and-search-string (text prefix &optional url-decider)
+  "Converts illegal characters in TEXT to their %XX versions, and then googles.
+
+Don't call this function directly, it could change depending on
+version. Use `google-string' instead (or any of the other
+google-\"something\" functions).
+
+Also understands the \"site:example.com\" option, but not yet any
+of the other options (mostly because I don't know what they are).
+TODO"
+  (unless url-decider (setq url-decider 'google-this-decide-url))
+  (let* ((option-regexp "\\bsite:[^ ]+")
+         (case-fold-search t)
+         (brute-query (replace-regexp-in-string option-regexp "" text))
+         (site-option (if (string-match regexp text) (match-string-no-properties 0 text) ""))
+         (query-string (dolist (rp google-this-url-parser-regexps brute-query)
+                         (setq brute-query (replace-regexp-in-string (car rp) (car (cdr rp)) brute-query)))))
+    ;; Decide whether to quote the query.
+    (if (if prefix (not google-wrap-in-quotes) google-wrap-in-quotes)
+        (setq query-string (concat "\"" query-string "\"")))
+    ;; Create the url and perform the actual search.
+    (browse-url (replace-regexp-in-string "%s" (concat query-string "+" site-option) (funcall url-decider))))
+  ;; Maybe suspend emacs.
+  (when google-this-suspend-after-search (suspend-frame)))
+
+(defalias 'parse-and-google-string 'google-this-parse-and-search-string
+  "OBSOLETE alias.")
 
 ;;;###autoload
 (defun google-string (prefix &optional TEXT NOCONFIRM)
   "Google given TEXT, but ask the user first if NOCONFIRM is nil."
-  (interactive)
   (unless NOCONFIRM
     (setq TEXT (read-string "Googling: " 
                             (if (stringp TEXT) (replace-regexp-in-string "^[[:blank:]]*" "" TEXT)))))
   (if (stringp TEXT)
-      (parse-and-google-string TEXT prefix)
+      (google-this-parse-and-search-string TEXT prefix)
     (message "[google-string] Empty query.")))
 
 ;;;###autoload
@@ -260,19 +288,18 @@ simple error strings (such as c-like erros).
 
 Uses replacements in `google-error-regexp' and stops at the first match."
   (interactive)
-  (dolist (cur google-error-regexp out)
-    (when (string-match (car cur) s)
-        (setq out 
-              (replace-regexp-in-string  (car cur)
-                                         (car (cdr cur))
-                                         s))
-        (return out))))
+  (let (out)
+    (dolist (cur google-error-regexp out)
+      (when (string-match (car cur) s)
+        (setq out (replace-regexp-in-string
+                   (car cur) (car (cdr cur)) s))
+        (return out)))))
 
 ;;;###autoload
 (defun google-cpp-reference ()
   "Visit the most probable cppreference.com page for this word."
   (interactive)
-  (parse-and-google-string (concat "site:cppreference.com " (thing-at-point 'symbol)) nil 'google-feeling-lucky-decider))
+  (google-this-parse-and-search-string (concat "site:cppreference.com " (thing-at-point 'symbol)) nil 'google-feeling-lucky-decider))
 
 (defun google-feeling-lucky-decider (prefix)
   "Just returns the feeling lucky url."
@@ -282,8 +309,8 @@ Uses replacements in `google-error-regexp' and stops at the first match."
 (defun google-forecast (prefix)
   "Just searches google for \"weather\"."
   (interactive "P")
-  (if (not prefix) (parse-and-google-string "weather" nil)
-    (parse-and-google-string (concat "weather " (read-string "Location: " nil nil "")) nil)))
+  (if (not prefix) (google-this-parse-and-search-string "weather" nil)
+    (google-this-parse-and-search-string (concat "weather " (read-string "Location: " nil nil "")) nil)))
 
 ;;;###autoload
 (define-minor-mode google-this-mode nil nil " Google"
