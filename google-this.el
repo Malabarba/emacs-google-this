@@ -15,14 +15,22 @@
 ;; The main function is `google-this' (bound to C-c / g). It does a
 ;; google search using the currently selected region, or the
 ;; expression under point. All functions are bound under "C-c /"
-;; prefix, in order to comply with emacs' standards. To see all
-;; keybindings type "C-c / C-h".
+;; prefix, in order to comply with emacs' standards. If that's a
+;; problem see `google-this-keybind'. To view all keybindings type "C-c
+;; / C-h".
 ;;
 ;; If you don't like this keybind, just reassign the
 ;; `google-this-mode-submap' variable.
 ;; My personal preference is "C-x g":
-;; 
+;;
 ;;        (global-set-key (kbd "C-x g") 'google-this-mode-submap)
+;;
+;; Or, if you don't want google-this to overwrite the default ("C-c /")
+;; key insert the following line BEFORE everything else (even before
+;; the `require' command):
+;;
+;;        (setq google-this-keybind (kbd "C-x g"))
+;;
 
 ;; To start a blank search, do `google-search' (C-c / RET). If you
 ;; want more control of what "under point" means for the `google-this'
@@ -46,16 +54,16 @@
 ;; INSTALLATION
 
 ;;  Make sure "google-this.el" is in your load path, then place
-;; 	this code in your .emacs file:
+;;      this code in your .emacs file:
 ;;		(require 'google-this)
-;; 		(google-this-mode 1)
+;;              (google-this-mode 1)
 
 ;;
 ;; This program is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
-;; 
+;;
 
 ;;; Change Log:
 ;; 1.4 - 20130603 - Added parent groups.
@@ -96,13 +104,13 @@ opposite happens."
 
 (define-prefix-command 'google-this-mode-submap)
 (define-key google-this-mode-submap [return] 'google-search)
-(define-key google-this-mode-submap "t" 'google-this) 
+(define-key google-this-mode-submap "t" 'google-this)
 (define-key google-this-mode-submap "w" 'google-word)
 (define-key google-this-mode-submap "s" 'google-symbol)
 (define-key google-this-mode-submap "l" 'google-line)
-(define-key google-this-mode-submap "e" 'google-error) 
+(define-key google-this-mode-submap "e" 'google-error)
 (define-key google-this-mode-submap "f" 'google-forecast)
-(define-key google-this-mode-submap "r" 'google-cpp-reference) 
+(define-key google-this-mode-submap "r" 'google-cpp-reference)
 (define-key google-this-mode-submap "m" 'google-maps)
 ;; "c" is for "convert language" :-P
 (define-key google-this-mode-submap "c" 'google-translate-query-or-region)
@@ -219,7 +227,7 @@ TODO"
 (defun google-string (prefix &optional TEXT NOCONFIRM)
   "Google given TEXT, but ask the user first if NOCONFIRM is nil."
   (unless NOCONFIRM
-    (setq TEXT (read-string "Googling: " 
+    (setq TEXT (read-string "Googling: "
                             (if (stringp TEXT) (replace-regexp-in-string "^[[:blank:]]*" "" TEXT)))))
   (if (stringp TEXT)
       (google-this-parse-and-search-string TEXT prefix)
@@ -273,12 +281,12 @@ in the minibuffer to be edited."
   (unless (boundp 'compilation-mode-map)
     (error "No compilation active."))
   (save-excursion
-    (let ((pt (point)) 
+    (let ((pt (point))
           (buffer-name (next-error-find-buffer)))
       (unless (compilation-buffer-internal-p)
         (set-buffer buffer-name))
       (google-string prefix
-                     (google-this-clean-error-string 
+                     (google-this-clean-error-string
                       (buffer-substring (line-beginning-position) (line-end-position)))))))
 
 
@@ -315,12 +323,23 @@ Uses replacements in `google-error-regexp' and stops at the first match."
   (if (not prefix) (google-this-parse-and-search-string "weather" nil)
     (google-this-parse-and-search-string (concat "weather " (read-string "Location: " nil nil "")) nil)))
 
+(defcustom google-this-keybind (kbd "C-c /")
+  "Keybinding under which `google-this-mode-submap' is assigned.
+
+To change this do something like:
+    (setq google-this-keybind (kbd \"C-x g\"))
+BEFORE activating `google-this-mode' and BEFORE `require'ing the
+`google-this' feature."
+  :type 'string
+  :group 'google-this
+  :package-version '(google-this . "1.4"))
+
 ;;;###autoload
 (define-minor-mode google-this-mode nil nil " Google"
-  `((,(kbd "C-c /") . ,google-this-mode-submap))
+  `((,google-this-keybind . ,google-this-mode-submap))
   :global t
   :group 'google-this)
-;; (global-set-key (kbd "C-x g") 'google-this-mode-submap)
+;; (setq google-this-keybind (kbd \"C-x g\"))
 
 (provide 'google-this)
 
