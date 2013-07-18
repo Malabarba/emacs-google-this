@@ -4,7 +4,7 @@
 
 ;; Author: Artur Malabarba <bruce.connor.am@gmail.com>
 ;; URL: http://github.com/Bruce-Connor/emacs-google-this
-;; Version: 1.4
+;; Version: 1.5
 ;; Keywords: convenience hypermedia
 
 ;;; Commentary:
@@ -35,7 +35,7 @@
 ;; To start a blank search, do `google-search' (C-c / RET). If you
 ;; want more control of what "under point" means for the `google-this'
 ;; command, there are the `google-word', `google-symbol',
-;; `google-line' and `google-region' functions, bound as w, s, l and r,
+;; `google-line' and `google-region' functions, bound as w, s, l and space,
 ;; respectively. They all do a search for what's under point.
 
 ;; If the `google-wrap-in-quotes' variable is t, than searches are
@@ -48,6 +48,8 @@
 ;; (to remove file name, line number, etc), and googles it. It's still
 ;; experimental, and has only really been tested with gcc error
 ;; reports.
+
+;; Finally there's also a google-cpp-reference function (C-c / r).
 
 ;;; Instructions:
 
@@ -66,6 +68,8 @@
 ;;
 
 ;;; Change Log:
+;; 1.5 - 20130718 - added keybinding for google region.
+;; 1.5 - 20130718 - Fixed cpp-reference.
 ;; 1.4 - 20130603 - Added parent groups.
 ;; 1.4 - 20130603 - Renamed some functions and variables. Is backwards incompatible if you were using functions you shouldn't be.
 ;; 1.4 - 20130603 - Fixed quoting.
@@ -104,6 +108,7 @@ opposite happens."
 
 (define-prefix-command 'google-this-mode-submap)
 (define-key google-this-mode-submap [return] 'google-search)
+(define-key google-this-mode-submap " " 'google-region)
 (define-key google-this-mode-submap "t" 'google-this)
 (define-key google-this-mode-submap "w" 'google-word)
 (define-key google-this-mode-submap "s" 'google-symbol)
@@ -216,7 +221,10 @@ TODO"
     (if (if prefix (not google-wrap-in-quotes) google-wrap-in-quotes)
         (setq query-string (concat "\"" query-string "\"")))
     ;; Create the url and perform the actual search.
-    (browse-url (replace-regexp-in-string "%s" (concat query-string "+" site-option) (funcall url-decider))))
+    (browse-url (replace-regexp-in-string "%s" (concat query-string
+                                                       (when site-option
+                                                         (concat "+" site-option)))
+                                          (funcall url-decider))))
   ;; Maybe suspend emacs.
   (when google-this-suspend-after-search (suspend-frame)))
 
@@ -312,8 +320,11 @@ Uses replacements in `google-error-regexp' and stops at the first match."
   (interactive)
   (google-this-parse-and-search-string (concat "site:cppreference.com " (thing-at-point 'symbol)) nil 'google-feeling-lucky-decider))
 
-(defun google-feeling-lucky-decider (prefix)
-  "Just returns the feeling lucky url."
+(defun google-feeling-lucky-decider (&optional obsolete)
+  "Just returns the feeling lucky url.
+
+The argument is obsolete and doesn't do anything, it is kept for
+backwards compatibility."
   (concat "https://www.google." google-location-suffix "/search?btnI=I'm Feeling Lucky&q=%s"))
 
 ;;;###autoload
