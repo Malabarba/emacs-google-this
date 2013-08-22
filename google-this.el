@@ -4,8 +4,10 @@
 
 ;; Author: Artur Malabarba <bruce.connor.am@gmail.com>
 ;; URL: http://github.com/Bruce-Connor/emacs-google-this
-;; Version: 1.5
+;; Version: 1.6
 ;; Keywords: convenience hypermedia
+;; Prefix: google-this
+;; Separator: -
 
 ;;; Commentary:
 
@@ -68,6 +70,7 @@
 ;;
 
 ;;; Change Log:
+;; 1.6 - 20130822 - Activated google-instant, so you can navigate straight for the keyboard
 ;; 1.5 - 20130718 - added keybinding for google region.
 ;; 1.5 - 20130718 - Fixed cpp-reference.
 ;; 1.4 - 20130603 - Added parent groups.
@@ -89,9 +92,9 @@
   :link '(url-link "http://github.com/Bruce-Connor/emacs-google-this")
   :group 'convenience
   :group 'comm)
-(defconst google-this-version "1.4"
+(defconst google-this-version "1.6"
   "Version string of the `google-this' package.")
-(defconst google-this-version-int 4
+(defconst google-this-version-int 6
   "Integer version number of the `google-this' package (for comparing versions).")
 (defcustom google-wrap-in-quotes nil
   "If not nil, searches are wrapped in double quotes.
@@ -139,11 +142,11 @@ opposite happens."
   :group 'google-this)
 
 (defun google-url () "URL to google searches."
-  (concat "https://www.google." google-location-suffix "/search?q=%s"))
+  (concat "https://www.google." google-location-suffix "/search?ion=1&q=%s"))
 
 (defun google-quoted-url () "OBSOLETE
 URL to quoted google searches."
-  (concat "https://www.google." google-location-suffix "/search?q=%22%s%22"))
+  (concat "https://www.google." google-location-suffix "/search?ion=1&q=%22%s%22"))
 
 
 (defcustom google-this-url-parser-regexps '(
@@ -154,6 +157,8 @@ URL to quoted google searches."
                                 ("/" "%2F")
                                 ("\\\\" "\\\\\\\\")
                                 ("[[:blank:]]+" "+")
+                                ("^ " "")
+                                (" $" "")
                                 ("^\\+" "")
                                 ("\\+$" "")
                                 )
