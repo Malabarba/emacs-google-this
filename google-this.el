@@ -168,27 +168,34 @@ we are keeping it for possible future plans. DUMMY is not supposed to be used, c
     (google-url)))
 
 ;;;###autoload
-(defun google-search (prefix)
+(defun google-search (prefix &optional search-url)
   "Write and do a google search."
   (interactive "P")
-  (let ((TEXT (if (region-active-p)
-                  (buffer-substring-no-properties (region-beginning) (region-end))
-                (or (thing-at-point 'symbol)
-                    (thing-at-point 'word)
-                    (buffer-substring-no-properties (line-beginning-position)
-                                                    (line-end-position))))))
-    (setq TEXT (read-string (concat "Googling [" TEXT "]: ") nil nil TEXT))
+  (let* ((TEXT (if (region-active-p)
+                   (buffer-substring-no-properties (region-beginning) (region-end))
+                 (or (thing-at-point 'symbol)
+                     (thing-at-point 'word)
+                     (buffer-substring-no-properties (line-beginning-position)
+                                                     (line-end-position)))))
+         (TEXT (read-string (concat "Googling [" TEXT "]: ") nil nil TEXT)))
     (if (stringp TEXT)
-        (google-this-parse-and-search-string TEXT prefix)
+        (google-this-parse-and-search-string TEXT prefix search-url)
       (message "[google-string] Empty query."))))
 
+(defun google-lucky-search-url ()
+  (format "https://www.google.%s/search?q=%%s&btnI" google-location-suffix))
+
+;;;###autoload
+(defun google-lucky-search (prefix)
+  (interactive "P")
+  (google-search prefix (google-lucky-search-url)))
 
 (defun google-wrap-in-quotes? (flip)
   (if flip
       (not google-wrap-in-quotes)
     google-wrap-in-quotes))
 
-(defun google-this-parse-and-search-string (text prefix &optional url-decider)
+(defun google-this-parse-and-search-string (text prefix &optional search-url)
   "Converts illegal characters in TEXT to their %XX versions, and then googles.
 
 Don't call this function directly, it could change depending on
@@ -196,10 +203,9 @@ version. Use `google-string' instead (or any of the other
 google-\"something\" functions)."
   (let ((query-string (if (google-wrap-in-quotes? prefix)
                           (format "\"%s\"" text)
-                        text))
-        (url-decider (if url-decider url-decider 'google-this-decide-url)))
+                        text)))
     ;; Create the url and perform the actual search.
-    (browse-url (format (funcall url-decider) (url-hexify-string query-string))))
+    (browse-url (format (or search-url (google-url)) (url-hexify-string query-string))))
   ;; Maybe suspend emacs.
   (when google-this-suspend-after-search (suspend-frame)))
 
@@ -293,14 +299,15 @@ Uses replacements in `google-error-regexp' and stops at the first match."
 (defun google-cpp-reference ()
   "Visit the most probable cppreference.com page for this word."
   (interactive)
-  (google-this-parse-and-search-string (concat "site:cppreference.com " (thing-at-point 'symbol)) nil 'google-feeling-lucky-decider))
+  (google-this-parse-and-search-string (concat "site:cppreference.com " (thing-at-point 'symbol)) nil (google-lucky-search-url)))
 
 (defun google-feeling-lucky-decider (&optional obsolete)
   "Just returns the feeling lucky url.
 
 The argument is obsolete and doesn't do anything, it is kept for
 backwards compatibility."
-  (concat "https://www.google." google-location-suffix "/search?btnI=I'm Feeling Lucky&q=%s"))
+  (message "OBSOLETE google-feeling-lucky-decider. Use google-lucky-search-url")
+  (google-lucky-search-url))
 
 ;;;###autoload
 (defun google-forecast (prefix)
