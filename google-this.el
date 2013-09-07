@@ -170,14 +170,12 @@ we are keeping it for possible future plans. DUMMY is not supposed to be used, c
 (defun google-search (prefix)
   "Write and do a google search."
   (interactive "P")
-  (let ((TEXT (replace-regexp-in-string
-               "^\\s-+" ""
-               (if (region-active-p)
-                   (buffer-substring-no-properties (region-beginning) (region-end))
-                 (or (thing-at-point 'symbol)
-                     (thing-at-point 'word)
-                     (buffer-substring-no-properties (line-beginning-position)
-                                                     (line-end-position)))) )))
+  (let ((TEXT (if (region-active-p)
+                  (buffer-substring-no-properties (region-beginning) (region-end))
+                (or (thing-at-point 'symbol)
+                    (thing-at-point 'word)
+                    (buffer-substring-no-properties (line-beginning-position)
+                                                    (line-end-position))))))
     (setq TEXT (read-string (concat "Googling [" TEXT "]: ") nil nil TEXT))
     (if (stringp TEXT)
         (google-this-parse-and-search-string TEXT prefix)
