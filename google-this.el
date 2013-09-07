@@ -86,6 +86,7 @@
 ;; 2013-02-27 -- Added support for google-translate and google-maps packages. And added `google-forecast' function. And added `google-location-suffix' so we're not constrained to google.com anymore.
 ;;; Code:
 
+(require 'url)
 
 (defgroup google-this '()
   "Customization group for `google-this-mode'."
