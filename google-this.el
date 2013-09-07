@@ -86,6 +86,7 @@
 ;; 2013-02-27 -- Added support for google-translate and google-maps packages. And added `google-forecast' function. And added `google-location-suffix' so we're not constrained to google.com anymore.
 ;;; Code:
 
+(require 'url)
 
 (defgroup google-this '()
   "Customization group for `google-this-mode'."
@@ -149,31 +150,10 @@ URL to quoted google searches."
   (concat "https://www.google." google-location-suffix "/search?ion=1&q=%22%s%22"))
 
 
-(defcustom google-this-url-parser-regexps '(
-                                ("%" "%25")
-                                ("\\+" "%2B")
-                                ("&" "%26")
-                                ("\"" "%22")
-                                ("/" "%2F")
-                                ("\\\\" "\\\\\\\\")
-                                ("[[:blank:]]+" "+")
-                                ("^ " "")
-                                (" $" "")
-                                ("^\\+" "")
-                                ("\\+$" "")
-                                )
-  "List of (REGEXP REPLACEMENT) used by `google-this-parse-and-search-string'.
-
-You shouldn't have to edit this. If you are forced to edit this
-for some reason, contact me and let me know."
-  :type '(repeat (list regexp string))
-  :group 'google-this)
-
 (defcustom google-error-regexp '(("^[^:]*:[0-9 ]*:\\([0-9 ]*:\\)? *" ""))
   "List of (REGEXP REPLACEMENT) pairs to parse error strings."
   :type '(repeat (list regexp string))
   :group 'google-this)
-
 
 (defun google-this-decide-url (&optional dummy)
   "Decide which url to use.
@@ -191,45 +171,35 @@ we are keeping it for possible future plans. DUMMY is not supposed to be used, c
 (defun google-search (prefix)
   "Write and do a google search."
   (interactive "P")
-  (let ((TEXT (replace-regexp-in-string
-               "^\\s-+" ""
-               (if (region-active-p)
-                   (buffer-substring-no-properties (region-beginning) (region-end))
-                 (or (thing-at-point 'symbol)
-                     (thing-at-point 'word)
-                     (buffer-substring-no-properties (line-beginning-position)
-                                                     (line-end-position)))) )))
+  (let ((TEXT (if (region-active-p)
+                  (buffer-substring-no-properties (region-beginning) (region-end))
+                (or (thing-at-point 'symbol)
+                    (thing-at-point 'word)
+                    (buffer-substring-no-properties (line-beginning-position)
+                                                    (line-end-position))))))
     (setq TEXT (read-string (concat "Googling [" TEXT "]: ") nil nil TEXT))
     (if (stringp TEXT)
         (google-this-parse-and-search-string TEXT prefix)
       (message "[google-string] Empty query."))))
 
 
+(defun google-wrap-in-quotes? (flip)
+  (if flip
+      (not google-wrap-in-quotes)
+    google-wrap-in-quotes))
+
 (defun google-this-parse-and-search-string (text prefix &optional url-decider)
   "Converts illegal characters in TEXT to their %XX versions, and then googles.
 
 Don't call this function directly, it could change depending on
 version. Use `google-string' instead (or any of the other
-google-\"something\" functions).
-
-Also understands the \"site:example.com\" option, but not yet any
-of the other options (mostly because I don't know what they are).
-TODO"
-  (unless url-decider (setq url-decider 'google-this-decide-url))
-  (let* ((option-regexp "\\bsite:[^ ]+")
-         (case-fold-search t)
-         (brute-query (replace-regexp-in-string option-regexp "" text))
-         (site-option (if (string-match option-regexp text) (match-string-no-properties 0 text) ""))
-         (query-string (dolist (rp google-this-url-parser-regexps brute-query)
-                         (setq brute-query (replace-regexp-in-string (car rp) (car (cdr rp)) brute-query)))))
-    ;; Decide whether to quote the query.
-    (if (if prefix (not google-wrap-in-quotes) google-wrap-in-quotes)
-        (setq query-string (concat "\"" query-string "\"")))
+google-\"something\" functions)."
+  (let ((query-string (if (google-wrap-in-quotes? prefix)
+                          (format "\"%s\"" text)
+                        text))
+        (url-decider (if url-decider url-decider 'google-this-decide-url)))
     ;; Create the url and perform the actual search.
-    (browse-url (replace-regexp-in-string "%s" (concat query-string
-                                                       (when site-option
-                                                         (concat "+" site-option)))
-                                          (funcall url-decider))))
+    (browse-url (format (funcall url-decider) (url-hexify-string query-string))))
   ;; Maybe suspend emacs.
   (when google-this-suspend-after-search (suspend-frame)))
 
