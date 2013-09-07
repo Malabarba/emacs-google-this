@@ -1,3 +1,4 @@
+;;;-*-lexical-binding:t-*-
 ;;; google-this.el --- A set of functions and bindings to google under point.
 
 ;; Copyright (C) 2012 Artur Malabarba <bruce.connor.am@gmail.com>
@@ -167,23 +168,53 @@ we are keeping it for possible future plans. DUMMY is not supposed to be used, c
       dummy
     (google-url)))
 
-;;;###autoload
-(defun google-search (prefix &optional search-url)
-  "Write and do a google search."
+(defun google-pick-term (prefix)
   (interactive "P")
-  (let* ((TEXT (if (region-active-p)
+  (let* ((term (if (region-active-p)
                    (buffer-substring-no-properties (region-beginning) (region-end))
                  (or (thing-at-point 'symbol)
                      (thing-at-point 'word)
                      (buffer-substring-no-properties (line-beginning-position)
                                                      (line-end-position)))))
-         (TEXT (read-string (concat "Googling [" TEXT "]: ") nil nil TEXT)))
-    (if (stringp TEXT)
-        (google-this-parse-and-search-string TEXT prefix search-url)
+         (term (read-string (concat "Googling [" term "]: ") nil nil term)))
+    term))
+
+;;;###autoload
+(defun google-search (prefix &optional search-url)
+  "Write and do a google search."
+  (interactive "P")
+  (let* ((term (google-pick-term prefix)))
+    (if (stringp term)
+        (google-this-parse-and-search-string term prefix search-url)
       (message "[google-string] Empty query."))))
 
 (defun google-lucky-search-url ()
   (format "https://www.google.%s/search?q=%%s&btnI" google-location-suffix))
+
+(defun google--do-lucky-search (term callback)
+  (url-retrieve (format (google-lucky-search-url) (url-hexify-string term))
+                (lambda (status)
+                  (when (eq :redirect (car status))
+                    (funcall callback (cadr status))))
+                nil
+                t))
+
+;;;###autoload
+(defun google-lucky-insert ()
+  ;; Eventually make this able to decide whether or not to use the
+  ;; region based on whether it's active. If it's not active, read
+  ;; from a prompt
+  ;; (interactive "Search for: ")
+  (interactive)
+  (let ((term (if (region-active-p) (buffer-substring-no-properties (region-beginning) (region-end)))))
+    (if term
+        (google--do-lucky-search term
+                                 (let ((b (current-buffer)))
+                                   (lambda (url)
+                                     (with-current-buffer b
+                                       (delete-region (region-beginning) (region-end))
+                                       (insert url)))))
+      (message "No active region."))))
 
 ;;;###autoload
 (defun google-lucky-search (prefix)
