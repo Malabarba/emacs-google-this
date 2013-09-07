@@ -194,15 +194,11 @@ we are keeping it for possible future plans. DUMMY is not supposed to be used, c
 
 Don't call this function directly, it could change depending on
 version. Use `google-string' instead (or any of the other
-google-\"something\" functions).
-
-Also understands the \"site:example.com\" option, but not yet any
-of the other options (mostly because I don't know what they are).
-TODO"
-  (unless url-decider (setq url-decider 'google-this-decide-url))
+google-\"something\" functions)."
   (let ((query-string (if (google-wrap-in-quotes? prefix)
                           (format "\"%s\"" text)
-                        text)))
+                        text))
+        (url-decider (if url-decider url-decider 'google-this-decide-url)))
     ;; Create the url and perform the actual search.
     (browse-url (format (funcall url-decider) (url-hexify-string query-string))))
   ;; Maybe suspend emacs.
