@@ -70,6 +70,7 @@
 ;;
 
 ;;; Change Log:
+;; 1.7 - 20130908 - Removed some obsolete aliases
 ;; 1.7 - 20130908 - Implemented google-lucky-and-insert-url, with keybinding.
 ;; 1.7 - 20130908 - Implemented google-lucky, with keybinding.
 ;; 1.6 - 20130822 - Activated google-instant, so you can navigate straight for the keyboard
@@ -243,18 +244,19 @@ Non-Interactively:
                                             google-this--last-url url))))
     (when nint
       (while google-this--is-waiting (sleep-for 0 10))
-      (setq google-this--is-waiting nil)
+      (setq google-this--is-waiting t)
       google-this--last-url)))
 
 ;;;###autoload
 (defun google-lucky-search (prefix)
+  "Exactly like `google-search', but uses the \"I'm feeling lucky\" option."
   (interactive "P")
   (google-search prefix (google-lucky-search-url)))
 
-(defun google-wrap-in-quotes? (flip)
-  (if flip
-      (not google-wrap-in-quotes)
-    google-wrap-in-quotes))
+(defun google-this--maybe-wrap-in-quotes (text flip)
+  (if (if flip (not google-wrap-in-quotes) google-wrap-in-quotes)
+      (format "\"%s\"" text)
+    text))
 
 (defun google-this-parse-and-search-string (text prefix &optional search-url)
   "Converts illegal characters in TEXT to their %XX versions, and then googles.
@@ -262,16 +264,11 @@ Non-Interactively:
 Don't call this function directly, it could change depending on
 version. Use `google-string' instead (or any of the other
 google-\"something\" functions)."
-  (let ((query-string (if (google-wrap-in-quotes? prefix)
-                          (format "\"%s\"" text)
-                        text)))
+  (let ((query-string (google-this--maybe-wrap-in-quotes prefix)))
     ;; Create the url and perform the actual search.
     (browse-url (format (or search-url (google-url)) (url-hexify-string query-string))))
   ;; Maybe suspend emacs.
   (when google-this-suspend-after-search (suspend-frame)))
-
-(defalias 'parse-and-google-string 'google-this-parse-and-search-string
-  "OBSOLETE alias.")
 
 ;;;###autoload
 (defun google-string (prefix &optional TEXT NOCONFIRM)
