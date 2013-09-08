@@ -156,20 +156,19 @@ URL to quoted google searches."
   :type '(repeat (list regexp string))
   :group 'google-this)
 
-(defun google-this-decide-url (&optional dummy)
-  "Decide which url to use.
+;; (defun google-this-decide-url (&optional dummy)
+;;   "Decide which url to use.
 
-This used to be for quoting, now quoting is done differently but
-we are keeping it for possible future plans. DUMMY is not supposed to be used, currently."
-  ;; (if (if prefix (not google-wrap-in-quotes) google-wrap-in-quotes)
-  ;;     (google-quoted-url)
-  ;;   (google-url))
-  (if (stringp dummy)
-      dummy
-    (google-url)))
+;; This used to be for quoting, now quoting is done differently but
+;; we are keeping it for possible future plans. DUMMY is not supposed to be used, currently."
+;;   ;; (if (if prefix (not google-wrap-in-quotes) google-wrap-in-quotes)
+;;   ;;     (google-quoted-url)
+;;   ;;   (google-url))
+;;   (if (stringp dummy)
+;;       dummy
+;;     (google-url)))
 
 (defun google-pick-term (prefix)
-  (interactive "P")
   (let* ((term (if (region-active-p)
                    (buffer-substring-no-properties (region-beginning) (region-end))
                  (or (thing-at-point 'symbol)
