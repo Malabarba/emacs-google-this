@@ -196,11 +196,10 @@ URL to quoted google searches."
 
 (defun google--do-lucky-search (term callback)
   (url-retrieve (format (google-lucky-search-url) (url-hexify-string term))
-                (lambda (status)
-                  (when (eq :redirect (car status))
-                    (funcall callback (cadr status))))
-                nil
-                t))
+                (eval `(lambda (status)
+                         (when (eq :redirect (car status))
+                           (funcall ,callback (cadr status)))))
+                nil t))
 
 (defvar google-this--is-waiting t "t while we're waiting for url-retrieve.")
 (defvar google-this--last-url nil "Last url that was fetched by `google-lucky-and-insert-url'.")
