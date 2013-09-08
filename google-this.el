@@ -1,11 +1,10 @@
-;;;-*-lexical-binding:t-*-
 ;;; google-this.el --- A set of functions and bindings to google under point.
 
 ;; Copyright (C) 2012 Artur Malabarba <bruce.connor.am@gmail.com>
 
 ;; Author: Artur Malabarba <bruce.connor.am@gmail.com>
 ;; URL: http://github.com/Bruce-Connor/emacs-google-this
-;; Version: 1.6
+;; Version: 1.7
 ;; Keywords: convenience hypermedia
 ;; Prefix: google-this
 ;; Separator: -
@@ -71,6 +70,8 @@
 ;;
 
 ;;; Change Log:
+;; 1.7 - 20130908 - Implemented google-lucky-and-insert-url, with keybinding.
+;; 1.7 - 20130908 - Implemented google-lucky, with keybinding.
 ;; 1.6 - 20130822 - Activated google-instant, so you can navigate straight for the keyboard
 ;; 1.5 - 20130718 - added keybinding for google region.
 ;; 1.5 - 20130718 - Fixed cpp-reference.
@@ -94,9 +95,9 @@
   :link '(url-link "http://github.com/Bruce-Connor/emacs-google-this")
   :group 'convenience
   :group 'comm)
-(defconst google-this-version "1.6"
+(defconst google-this-version "1.7"
   "Version string of the `google-this' package.")
-(defconst google-this-version-int 6
+(defconst google-this-version-int 7
   "Integer version number of the `google-this' package (for comparing versions).")
 (defcustom google-wrap-in-quotes nil
   "If not nil, searches are wrapped in double quotes.
@@ -115,6 +116,8 @@ opposite happens."
 (define-key google-this-mode-submap [return] 'google-search)
 (define-key google-this-mode-submap " " 'google-region)
 (define-key google-this-mode-submap "t" 'google-this)
+(define-key google-this-mode-submap "g" 'google-lucky)
+(define-key google-this-mode-submap "i" 'google-lucky-and-insert-url)
 (define-key google-this-mode-submap "w" 'google-word)
 (define-key google-this-mode-submap "s" 'google-symbol)
 (define-key google-this-mode-submap "l" 'google-line)
@@ -198,22 +201,50 @@ URL to quoted google searches."
                 nil
                 t))
 
+(defvar google-this--is-waiting t "t while we're waiting for url-retrieve.")
+(defvar google-this--last-url nil "Last url that was fetched by `google-lucky-and-insert-url'.")
+
 ;;;###autoload
-(defun google-lucky-insert ()
-  ;; Eventually make this able to decide whether or not to use the
-  ;; region based on whether it's active. If it's not active, read
-  ;; from a prompt
-  ;; (interactive "Search for: ")
-  (interactive)
-  (let ((term (if (region-active-p) (buffer-substring-no-properties (region-beginning) (region-end)))))
-    (if term
-        (google--do-lucky-search term
-                                 (let ((b (current-buffer)))
-                                   (lambda (url)
-                                     (with-current-buffer b
-                                       (delete-region (region-beginning) (region-end))
-                                       (insert url)))))
-      (message "No active region."))))
+(defun google-lucky-and-insert-url (term &optional insert)
+  "Fetch the url that would be visited by `google-lucky' and return it.
+
+Interactively:
+* Insert the URL at point,
+* Kill the searched term, removing it from the buffer (it is killed, not
+  deleted, so it can be easily yanked back if desired).
+* Search term defaults to region or line, and always queries for
+  confirmation.
+
+Non-Interactively:
+* Runs synchronously,
+* Only insert if INSERT is non-nil,
+* Search term is an argument without confirmation."
+  (interactive '(needsQuerying t))
+  (let ((nint (null (called-interactively-p 'any)))
+        (l (if (region-active-p) (region-beginning) (line-beginning-position)))
+        (r (if (region-active-p) (region-end) (line-end-position)))
+        ;; We get current-buffer and point here, because it's
+        ;; conceivable that they could change while waiting for input
+        ;; from read-string
+        (p (point))
+        (b (current-buffer)))
+    (when (eq term 'needsQuerying)
+      (setq term (read-string "Lucky Term: " (buffer-substring-no-properties l r))))
+    (unless (stringp term) (error "TERM must be a string!"))
+    (google--do-lucky-search term
+                             (eval `(lambda (url)
+                                      (with-current-buffer ,b
+                                        (save-excursion
+                                          (if ,nint (goto-char ,p)
+                                            (delete-region ,l ,r)
+                                            (goto-char ,l))
+                                          (when ,insert (insert url))))
+                                      (setq google-this--is-waiting nil
+                                            google-this--last-url url))))
+    (when nint
+      (while google-this--is-waiting (sleep-for 0 10))
+      (setq google-this--is-waiting nil)
+      google-this--last-url)))
 
 ;;;###autoload
 (defun google-lucky-search (prefix)
