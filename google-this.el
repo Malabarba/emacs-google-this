@@ -201,7 +201,6 @@ URL to quoted google searches."
                            (funcall ,callback (cadr status)))))
                 nil t))
 
-(defvar google-this--is-waiting t "t while we're waiting for url-retrieve.")
 (defvar google-this--last-url nil "Last url that was fetched by `google-lucky-and-insert-url'.")
 
 ;;;###autoload
@@ -228,23 +227,23 @@ Non-Interactively:
         ;; from read-string
         (p (point))
         (b (current-buffer)))
+    (when nint (setq google-this--last-url nil))
     (when (eq term 'needsQuerying)
       (setq term (read-string "Lucky Term: " (buffer-substring-no-properties l r))))
     (unless (stringp term) (error "TERM must be a string!"))
     (google--do-lucky-search term
                              (eval `(lambda (url)
+                                      (unless url (error "Received nil url."))
                                       (with-current-buffer ,b
                                         (save-excursion
                                           (if ,nint (goto-char ,p)
                                             (kill-region ,l ,r)
                                             (goto-char ,l))
                                           (when ,insert (insert url))))
-                                      (setq google-this--is-waiting nil
-                                            google-this--last-url url))))
+                                      (setq google-this--last-url url))))
     (unless nint (deactivate-mark))
     (when nint
-      (while google-this--is-waiting (sleep-for 0 10))
-      (setq google-this--is-waiting t)
+      (while (null google-this--last-url) (sleep-for 0 10))
       google-this--last-url)))
 
 ;;;###autoload
