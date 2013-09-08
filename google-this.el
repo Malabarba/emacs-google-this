@@ -205,7 +205,10 @@ URL to quoted google searches."
 
 ;;;###autoload
 (defun google-lucky-and-insert-url (term &optional insert)
-  "Fetch the url that would be visited by `google-lucky' and return it.
+  "Fetch the url that would be visited by `google-lucky'.
+
+If you just want to do an \"I'm feeling lucky search\", use
+`google-lucky-search' instead.
 
 Interactively:
 * Insert the URL at point,
