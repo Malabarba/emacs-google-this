@@ -117,7 +117,7 @@ opposite happens."
 (define-key google-this-mode-submap [return] 'google-search)
 (define-key google-this-mode-submap " " 'google-region)
 (define-key google-this-mode-submap "t" 'google-this)
-(define-key google-this-mode-submap "g" 'google-lucky)
+(define-key google-this-mode-submap "g" 'google-lucky-search)
 (define-key google-this-mode-submap "i" 'google-lucky-and-insert-url)
 (define-key google-this-mode-submap "w" 'google-word)
 (define-key google-this-mode-submap "s" 'google-symbol)
@@ -236,11 +236,12 @@ Non-Interactively:
                                       (with-current-buffer ,b
                                         (save-excursion
                                           (if ,nint (goto-char ,p)
-                                            (delete-region ,l ,r)
+                                            (kill-region ,l ,r)
                                             (goto-char ,l))
                                           (when ,insert (insert url))))
                                       (setq google-this--is-waiting nil
                                             google-this--last-url url))))
+    (unless nint (deactivate-mark))
     (when nint
       (while google-this--is-waiting (sleep-for 0 10))
       (setq google-this--is-waiting t)
@@ -263,7 +264,7 @@ Non-Interactively:
 Don't call this function directly, it could change depending on
 version. Use `google-string' instead (or any of the other
 google-\"something\" functions)."
-  (let ((query-string (google-this--maybe-wrap-in-quotes prefix)))
+  (let ((query-string (google-this--maybe-wrap-in-quotes text prefix)))
     ;; Create the url and perform the actual search.
     (browse-url (format (or search-url (google-url)) (url-hexify-string query-string))))
   ;; Maybe suspend emacs.
