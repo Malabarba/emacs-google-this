@@ -204,7 +204,7 @@ URL to quoted google searches."
 (defvar google-this--last-url nil "Last url that was fetched by `google-lucky-and-insert-url'.")
 
 ;;;###autoload
-(defun google-lucky-and-insert-url (term &optional insert)
+(defun google-lucky-and-insert-url (term &optional do-insert)
   "Fetch the url that would be visited by `google-lucky'.
 
 If you just want to do an \"I'm feeling lucky search\", use
@@ -219,10 +219,10 @@ Interactively:
 
 Non-Interactively:
 * Runs synchronously,
-* Only insert if INSERT is non-nil,
+* Only insert if DO-INSERT is non-nil,
 * Search term is an argument without confirmation."
   (interactive '(needsQuerying t))
-  (let ((nint (null (called-interactively-p 'any)))
+  (let ((not-called-interactively (null (called-interactively-p 'any)))
         (l (if (region-active-p) (region-beginning) (line-beginning-position)))
         (r (if (region-active-p) (region-end) (line-end-position)))
         ;; We get current-buffer and point here, because it's
@@ -230,23 +230,23 @@ Non-Interactively:
         ;; from read-string
         (p (point))
         (b (current-buffer)))
-    (when nint (setq google-this--last-url nil))
+    (when not-called-interactively (setq google-this--last-url nil))
     (when (eq term 'needsQuerying)
       (setq term (read-string "Lucky Term: " (buffer-substring-no-properties l r))))
     (unless (stringp term) (error "TERM must be a string!"))
     (google--do-lucky-search term
                              (eval `(lambda (url)
                                       (unless url (error "Received nil url."))
-                                      (with-current-buffer ,b
-                                        (save-excursion
-                                          (if ,nint (goto-char ,p)
-                                            (kill-region ,l ,r)
-                                            (goto-char ,l))
-                                          (when ,insert (insert url))))
                                       (setq google-this--last-url url))))
-    (unless nint (deactivate-mark))
-    (when nint
+    (unless not-called-interactively (deactivate-mark))
+    (when not-called-interactively
       (while (null google-this--last-url) (sleep-for 0 10))
+      (with-current-buffer b
+        (when not-called-interactively
+          (kill-region l r)
+          (goto-char l)
+          (when do-insert (insert google-this--last-url))
+          (deactivate-mark)))
       google-this--last-url)))
 
 ;;;###autoload
