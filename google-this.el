@@ -195,11 +195,16 @@ URL to quoted google searches."
   (format "https://www.google.%s/search?q=%%s&btnI" google-location-suffix))
 
 (defun google--do-lucky-search (term callback)
+  "Build the URL using TERM, perform the url-retrieve and call CALLBACK if we get redirected."
   (url-retrieve (format (google-lucky-search-url) (url-hexify-string term))
                 (eval `(lambda (status)
-                         (when (eq :redirect (car status))
-                           (funcall ,callback (cadr status)))))
-                nil t))
+                         (if status
+                             (if (eq :redirect (car status))
+                                 (progn (message "Received URL: %s" (cadr status))
+                                        (funcall ,callback (cadr status)))
+                               (message "Unkown response: %S" status))
+                           (message "Search returned no results."))))
+                nil t t))
 
 (defvar google-this--last-url nil "Last url that was fetched by `google-lucky-and-insert-url'.")
 
