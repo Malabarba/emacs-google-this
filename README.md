@@ -1,10 +1,6 @@
-emacs-google-this
-=================
-
 A set of emacs functions and bindings to google under point.
 
-Overview
-====
+------------------------
 
 *google-this.el* is a package that provides a set of functions and keybindings for
 launching google searches from within emacs.
