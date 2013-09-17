@@ -4,7 +4,7 @@
 
 ;; Author: Artur Malabarba <bruce.connor.am@gmail.com>
 ;; URL: http://github.com/Bruce-Connor/emacs-google-this
-;; Version: 1.7
+;; Version: 1.7.1
 ;; Keywords: convenience hypermedia
 ;; Prefix: google-this
 ;; Separator: -
@@ -70,7 +70,8 @@
 ;;
 
 ;;; Change Log:
-;; 1.7 - 20130908 - Removed some obsolete aliases
+;; 1.7.1 - 20130917 - google-this-parse-and-search-string returns what browse-url returns.
+;; 1.7 - 20130908 - Removed some obsolete aliases.
 ;; 1.7 - 20130908 - Implemented google-lucky-and-insert-url, with keybinding.
 ;; 1.7 - 20130908 - Implemented google-lucky, with keybinding.
 ;; 1.6 - 20130822 - Activated google-instant, so you can navigate straight for the keyboard
@@ -96,9 +97,9 @@
   :link '(url-link "http://github.com/Bruce-Connor/emacs-google-this")
   :group 'convenience
   :group 'comm)
-(defconst google-this-version "1.7"
+(defconst google-this-version "1.7.1"
   "Version string of the `google-this' package.")
-(defconst google-this-version-int 7
+(defconst google-this-version-int 8
   "Integer version number of the `google-this' package (for comparing versions).")
 (defcustom google-wrap-in-quotes nil
   "If not nil, searches are wrapped in double quotes.
@@ -271,11 +272,14 @@ Non-Interactively:
 Don't call this function directly, it could change depending on
 version. Use `google-string' instead (or any of the other
 google-\"something\" functions)."
-  (let ((query-string (google-this--maybe-wrap-in-quotes text prefix)))
-    ;; Create the url and perform the actual search.
-    (browse-url (format (or search-url (google-url)) (url-hexify-string query-string))))
-  ;; Maybe suspend emacs.
-  (when google-this-suspend-after-search (suspend-frame)))
+  (let* (;; Create the url
+         (query-string (google-this--maybe-wrap-in-quotes text prefix))
+         ;; Perform the actual search.
+         (browse-result (browse-url (format (or search-url (google-url)) (url-hexify-string query-string)))))
+    ;; Maybe suspend emacs.
+    (when google-this-suspend-after-search (suspend-frame))
+    ;; Return what browse-url returned (very usefull for tests).
+    browse-result))
 
 ;;;###autoload
 (defun google-string (prefix &optional TEXT NOCONFIRM)
