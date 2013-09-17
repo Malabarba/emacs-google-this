@@ -1,4 +1,4 @@
-A set of emacs functions and bindings to google under point.
+*A set of emacs functions and bindings to google under point.*
 
 ------------------------
 
