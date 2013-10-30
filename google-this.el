@@ -396,8 +396,11 @@ BEFORE activating `google-this-mode' and BEFORE `require'ing the
   :group 'google-this
   :package-version '(google-this . "1.4"))
 
+(defcustom google-this-modeline-indicator " Google"
+  "String to display in the modeline when google-this-mode is activated")
+
 ;;;###autoload
-(define-minor-mode google-this-mode nil nil " Google"
+(define-minor-mode google-this-mode nil nil google-this-modeline-indicator
   `((,google-this-keybind . ,google-this-mode-submap))
   :global t
   :group 'google-this)
