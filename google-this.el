@@ -1,10 +1,10 @@
 ;;; google-this.el --- A set of functions and bindings to google under point.
 
-;; Copyright (C) 2012 Artur Malabarba <bruce.connor.am@gmail.com>
+;; Copyright (C) 2012-2013 Artur Malabarba <bruce.connor.am@gmail.com>
 
 ;; Author: Artur Malabarba <bruce.connor.am@gmail.com>
 ;; URL: http://github.com/Bruce-Connor/emacs-google-this
-;; Version: 1.7.1
+;; Version: 1.8
 ;; Keywords: convenience hypermedia
 ;; Prefix: google-this
 ;; Separator: -
@@ -70,24 +70,28 @@
 ;;
 
 ;;; Change Log:
+;; 1.8   - 20131031 - Customizable mode-line indicator (credit https://github.com/mgalgs)
 ;; 1.7.1 - 20130917 - google-this-parse-and-search-string returns what browse-url returns.
-;; 1.7 - 20130908 - Removed some obsolete aliases.
-;; 1.7 - 20130908 - Implemented google-lucky-and-insert-url, with keybinding.
-;; 1.7 - 20130908 - Implemented google-lucky, with keybinding.
-;; 1.6 - 20130822 - Activated google-instant, so you can navigate straight for the keyboard
-;; 1.5 - 20130718 - added keybinding for google region.
-;; 1.5 - 20130718 - Fixed cpp-reference.
-;; 1.4 - 20130603 - Added parent groups.
-;; 1.4 - 20130603 - Renamed some functions and variables. Is backwards incompatible if you were using functions you shouldn't be.
-;; 1.4 - 20130603 - Fixed quoting.
-;; 1.3 - 20130531 - Merged fix for google-forecast. Thanks to ptrv.
-;; 1.3 - 20130531 - More robust google-translate command.
-;; 1.2.1 - 20130426 - Created an error parser for the google-error function. It works with c-like errors and is extendable to other types of errors using the varible `google-error-regexp'.
+;; 1.7   - 20130908 - Removed some obsolete aliases.
+;; 1.7   - 20130908 - Implemented google-lucky-and-insert-url, with keybinding.
+;; 1.7   - 20130908 - Implemented google-lucky, with keybinding.
+;; 1.6   - 20130822 - Activated google-instant, so you can navigate straight for the keyboard
+;; 1.5   - 20130718 - added keybinding for google region.
+;; 1.5   - 20130718 - Fixed cpp-reference.
+;; 1.4   - 20130603 - Added parent groups.
+;; 1.4   - 20130603 - Renamed some functions and variables. Is backwards incompatible if you were using functions you shouldn't be.
+;; 1.4   - 20130603 - Fixed quoting.
+;; 1.3   - 20130531 - Merged fix for google-forecast. Thanks to ptrv.
+;; 1.3   - 20130531 - More robust google-translate command.
+;; 1.2.1 - 20130426 - Created an error parser for the google-error function.
+;; pre   - 20130227 - It works with c-like errors and is extendable to other types of errors using the varible `google-error-regexp'.
 ;; 1.2.1 - 20130426 - autoloaded any functions that the user might want to call directly.
-;; 1.2 - 20130421 - Fixed docs.
-;; 2013-05-04 -- Changed the keybinding to be standards compliant.
-;; 2013-03-03 -- Fixed problem with backslash.
-;; 2013-02-27 -- Added support for google-translate and google-maps packages. And added `google-forecast' function. And added `google-location-suffix' so we're not constrained to google.com anymore.
+;; 1.2   - 20130421 - Fixed docs.
+;; pre   - 20130504 - Changed the keybinding to be standards compliant.
+;; pre   - 20130303 - Fixed problem with backslash.
+;; pre   - 20130227 - Added support for google-translate and google-maps packages.
+;; pre   - 20130227 - And added `google-forecast' function.
+;; pre   - 20130227 - And added `google-location-suffix' so we're not constrained to google.com anymore.
 ;;; Code:
 
 (require 'url)
@@ -97,9 +101,9 @@
   :link '(url-link "http://github.com/Bruce-Connor/emacs-google-this")
   :group 'convenience
   :group 'comm)
-(defconst google-this-version "1.7.1"
+(defconst google-this-version "1.8"
   "Version string of the `google-this' package.")
-(defconst google-this-version-int 8
+(defconst google-this-version-int 9
   "Integer version number of the `google-this' package (for comparing versions).")
 (defcustom google-wrap-in-quotes nil
   "If not nil, searches are wrapped in double quotes.
@@ -397,7 +401,10 @@ BEFORE activating `google-this-mode' and BEFORE `require'ing the
   :package-version '(google-this . "1.4"))
 
 (defcustom google-this-modeline-indicator " Google"
-  "String to display in the modeline when google-this-mode is activated")
+  "String to display in the modeline when google-this-mode is activated"
+  :type 'string
+  :group 'google-this
+  :package-version '(google-this . "1.8"))
 
 ;;;###autoload
 (define-minor-mode google-this-mode nil nil google-this-modeline-indicator
