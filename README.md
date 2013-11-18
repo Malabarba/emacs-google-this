@@ -1,6 +1,7 @@
-**A set of emacs functions and bindings to google under point.**
-
+google-this [![Donate](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=B9GT37MB4Y64E)
 ------------------------
+
+**A set of emacs functions and bindings to google under point.**
 
 *google-this.el* is a package that provides a set of functions and keybindings for
 launching google searches from within emacs.
