@@ -147,17 +147,22 @@ opposite happens."
         (call-interactively 'google-translate-query-translate)
       (error "[google-this]: `google-translate-query-translate' function not found in `google-translate' package."))))
 
+(defcustom google-location-prefix "https://www.google."
+  "The url prefix associated with your location."
+  :type 'string
+  :group 'google-this)
+
 (defcustom google-location-suffix "com"
   "The url suffix associated with your location (com, co.uk, fr, etc)."
   :type 'string
   :group 'google-this)
 
 (defun google-url () "URL to google searches."
-  (concat "https://www.google." google-location-suffix "/search?ion=1&q=%s"))
+  (concat google-location-prefix google-location-suffix "/search?ion=1&q=%s"))
 
 (defun google-quoted-url () "OBSOLETE
 URL to quoted google searches."
-  (concat "https://www.google." google-location-suffix "/search?ion=1&q=%22%s%22"))
+  (concat google-location-prefix google-location-suffix "/search?ion=1&q=%22%s%22"))
 
 
 (defcustom google-error-regexp '(("^[^:]*:[0-9 ]*:\\([0-9 ]*:\\)? *" ""))
@@ -197,7 +202,7 @@ URL to quoted google searches."
       (message "[google-string] Empty query."))))
 
 (defun google-lucky-search-url ()
-  (format "https://www.google.%s/search?q=%%s&btnI" google-location-suffix))
+  (format "%s%s/search?q=%%s&btnI" google-location-prefix google-location-suffix))
 
 (defun google--do-lucky-search (term callback)
   "Build the URL using TERM, perform the url-retrieve and call CALLBACK if we get redirected."
