@@ -30,13 +30,13 @@ language: emacs-lisp
 
 env:
   matrix:
-#   - EMACS=xemacs21
-    - EMACS=emacs22
-    - EMACS=emacs23
+    # - EMACS=xemacs21
+    # - EMACS=emacs22
+    # - EMACS=emacs23
     - EMACS=emacs24
     - EMACS=emacs-snapshot
-  global:
-    - SOME_TOKEN=some_value
+  # global:
+  #   - SOME_TOKEN=some_value
 
 ###
 ### allowing build failures
@@ -44,8 +44,8 @@ env:
 
 matrix:
   allow_failures:
-#   - env: EMACS=xemacs21
-    - env: EMACS=emacs22
+    # - env: EMACS=xemacs21
+    # - env: EMACS=emacs22
     - env: EMACS=emacs-snapshot
 
 ###
