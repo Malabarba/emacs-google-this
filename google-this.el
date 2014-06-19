@@ -96,6 +96,10 @@
 ;;; Code:
 
 (require 'url)
+(eval-when-compile
+  (progn
+    (require 'compile)
+    (require 'simple)))
 
 (defgroup google-this '()
   "Customization group for `google-this-mode'."
@@ -340,6 +344,8 @@ in the minibuffer to be edited."
   (interactive "P")
   (unless (boundp 'compilation-mode-map)
     (error "No compilation active."))
+  (require 'compile)
+  (require 'simple)
   (save-excursion
     (let ((pt (point))
           (buffer-name (next-error-find-buffer)))
@@ -360,11 +366,12 @@ simple error strings (such as c-like erros).
 Uses replacements in `google-error-regexp' and stops at the first match."
   (interactive)
   (let (out)
-    (dolist (cur google-error-regexp out)
-      (when (string-match (car cur) s)
-        (setq out (replace-regexp-in-string
-                   (car cur) (car (cdr cur)) s))
-        (return out)))))
+    (catch 'result
+      (dolist (cur google-error-regexp out)
+        (when (string-match (car cur) s)
+          (setq out (replace-regexp-in-string
+                     (car cur) (car (cdr cur)) s))
+          (throw 'result out))))))
 
 ;;;###autoload
 (defun google-cpp-reference ()
