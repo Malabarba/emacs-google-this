@@ -1,5 +1,6 @@
 (require 'ert)
 (add-to-list 'load-path (expand-file-name "./"))
+(add-to-list 'load-path (expand-file-name "../"))
 (require 'noflet)
 (require 'google-this)
 

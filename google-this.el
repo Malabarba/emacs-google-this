@@ -119,6 +119,7 @@ opposite happens."
   :type 'boolean
   :group 'google-this)
 
+(defvar google-this-mode-submap)
 (define-prefix-command 'google-this-mode-submap)
 (define-key google-this-mode-submap [return] 'google-search)
 (define-key google-this-mode-submap " " 'google-region)
