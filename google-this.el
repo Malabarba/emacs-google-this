@@ -4,7 +4,7 @@
 
 ;; Author: Artur Malabarba <bruce.connor.am@gmail.com>
 ;; URL: http://github.com/Bruce-Connor/emacs-google-this
-;; Version: 1.8
+;; Version: 1.9
 ;; Keywords: convenience hypermedia
 ;; Prefix: google-this
 ;; Separator: -
@@ -70,6 +70,7 @@
 ;;
 
 ;;; Change Log:
+;; 1.9   - 2014/06/19 - Customizable URL.
 ;; 1.8   - 20131031 - Customizable mode-line indicator (credit https://github.com/mgalgs)
 ;; 1.7.1 - 20130917 - google-this-parse-and-search-string returns what browse-url returns.
 ;; 1.7   - 20130908 - Removed some obsolete aliases.
@@ -101,9 +102,9 @@
   :link '(url-link "http://github.com/Bruce-Connor/emacs-google-this")
   :group 'convenience
   :group 'comm)
-(defconst google-this-version "1.8"
+(defconst google-this-version "1.9"
   "Version string of the `google-this' package.")
-(defconst google-this-version-int 9
+(defconst google-this-version-int 10
   "Integer version number of the `google-this' package (for comparing versions).")
 (defcustom google-wrap-in-quotes nil
   "If not nil, searches are wrapped in double quotes.
@@ -147,8 +148,11 @@ opposite happens."
         (call-interactively 'google-translate-query-translate)
       (error "[google-this]: `google-translate-query-translate' function not found in `google-translate' package."))))
 
-(defcustom google-location-prefix "https://www.google."
-  "The url prefix associated with your location."
+(defcustom google-base-url "https://www.google."
+  "The base url to use in google searches.
+
+This will be appended with `google-location-suffix', so you
+shouldn't include the final \"com\" here."
   :type 'string
   :group 'google-this)
 
@@ -158,29 +162,16 @@ opposite happens."
   :group 'google-this)
 
 (defun google-url () "URL to google searches."
-  (concat google-location-prefix google-location-suffix "/search?ion=1&q=%s"))
+  (concat google-base-url google-location-suffix "/search?ion=1&q=%s"))
 
 (defun google-quoted-url () "OBSOLETE
 URL to quoted google searches."
-  (concat google-location-prefix google-location-suffix "/search?ion=1&q=%22%s%22"))
-
+  (concat google-base-url google-location-suffix "/search?ion=1&q=%22%s%22"))
 
 (defcustom google-error-regexp '(("^[^:]*:[0-9 ]*:\\([0-9 ]*:\\)? *" ""))
   "List of (REGEXP REPLACEMENT) pairs to parse error strings."
   :type '(repeat (list regexp string))
   :group 'google-this)
-
-;; (defun google-this-decide-url (&optional dummy)
-;;   "Decide which url to use.
-
-;; This used to be for quoting, now quoting is done differently but
-;; we are keeping it for possible future plans. DUMMY is not supposed to be used, currently."
-;;   ;; (if (if prefix (not google-wrap-in-quotes) google-wrap-in-quotes)
-;;   ;;     (google-quoted-url)
-;;   ;;   (google-url))
-;;   (if (stringp dummy)
-;;       dummy
-;;     (google-url)))
 
 (defun google-pick-term (prefix)
   (let* ((term (if (region-active-p)
@@ -202,7 +193,7 @@ URL to quoted google searches."
       (message "[google-string] Empty query."))))
 
 (defun google-lucky-search-url ()
-  (format "%s%s/search?q=%%s&btnI" google-location-prefix google-location-suffix))
+  (format "%s%s/search?q=%%s&btnI" google-base-url google-location-suffix))
 
 (defun google--do-lucky-search (term callback)
   "Build the URL using TERM, perform the url-retrieve and call CALLBACK if we get redirected."
@@ -284,7 +275,8 @@ google-\"something\" functions)."
   (let* (;; Create the url
          (query-string (google-this--maybe-wrap-in-quotes text prefix))
          ;; Perform the actual search.
-         (browse-result (browse-url (format (or search-url (google-url)) (url-hexify-string query-string)))))
+         (browse-result (browse-url (format (or search-url (google-url))
+                                            (url-hexify-string query-string)))))
     ;; Maybe suspend emacs.
     (when google-this-suspend-after-search (suspend-frame))
     ;; Return what browse-url returned (very usefull for tests).
