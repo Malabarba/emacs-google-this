@@ -99,18 +99,18 @@ install:
         sudo apt-get -qq install emacs23-gtk emacs23-el;
     fi
   - if [ "$METHOD" = 'evm' ]; then
-        sudo mkdir /usr/local/evm
-        sudo chown travis:travis /usr/local/evm
-        sudo add-apt-repository -y ppa:cassou/emacs
-        sudo apt-get update -qq
-        sudo apt-get build-dep -qq emacs23
-        sudo apt-get build-dep -qq emacs24
-        curl -fsSkL https://raw.github.com/rejeep/evm/master/go | bash
-        export PATH="~/.evm/bin:$PATH"
-        chmod +x ~/.evm/bin/evm
-        ~/.evm/bin/evm install $EMACS
-        ~/.evm/bin/evm use $EMACS
-        export EMACS="~/.evm/bin/emacs"
+        sudo mkdir /usr/local/evm &&
+        sudo chown travis:travis /usr/local/evm &&
+        sudo add-apt-repository -y ppa:cassou/emacs &&
+        sudo apt-get update -qq &&
+        sudo apt-get build-dep -qq emacs23 &&
+        sudo apt-get build-dep -qq emacs24 &&
+        curl -fsSkL https://raw.github.com/rejeep/evm/master/go | bash &&
+        export PATH="~/.evm/bin:$PATH" &&
+        chmod +x ~/.evm/bin/evm &&
+        ~/.evm/bin/evm install $EMACS &&
+        ~/.evm/bin/evm use $EMACS &&
+        export EMACS="~/.evm/bin/emacs" &&
         EMACS="~/.evm/bin/emacs"
     fi
   - if [ "$EMACS" = 'emacs24' ]; then
