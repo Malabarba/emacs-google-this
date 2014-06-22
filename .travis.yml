@@ -32,7 +32,8 @@ env:
   - EMACS=emacs-23.4-bin METHOD=evm
   - EMACS=emacs-24.1-bin METHOD=evm
   - EMACS=emacs-24.2-bin METHOD=evm
-  - EMACS=emacs-24.3-bin METHOD=evm
+  - EMACS=emacs-24.2 METHOD=evm
+  # - EMACS=emacs-24.3-bin METHOD=evm
   - EMACS=emacs24 METHOD=manual
   - EMACS=emacs-snapshot METHOD=manual
 #  matrix:
@@ -110,8 +111,9 @@ install:
         chmod +x ~/.evm/bin/evm &&
         ~/.evm/bin/evm install $EMACS &&
         ~/.evm/bin/evm use $EMACS &&
-        export EMACS="~/.evm/bin/emacs" &&
-        EMACS="~/.evm/bin/emacs"
+        FULL_EMACS_PATH="/usr/local/evm/$EMACS/bin/emacs" &&
+        export EMACS="$FULL_EMACS_PATH" &&
+        EMACS="$FULL_EMACS_PATH";
     fi
   - if [ "$EMACS" = 'emacs24' ]; then
         sudo add-apt-repository -y ppa:cassou/emacs &&
