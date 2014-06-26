@@ -27,8 +27,21 @@
 ;; `this-fn'.
 
 ;;; Code:
+;; (unless (ignore-errors (require 'cl nil t))
+;;   (message "%s failed!" "(require 'cl nil t)"))
+;; (unless (ignore-errors (require 'cl-lib nil t))
+;;   (message "%s failed!" "(require 'cl-lib nil t)"))
+;; (unless (ignore-errors (require 'cl-macs nil t))
+;;   (message "%s failed!" "(require 'cl-macs nil t)"))
+(unless (load "cl-macs" t)
+  (message "%s failed!" "(load \"cl-macs\" t)"))
+(unless (load "cl" t)
+  (message "%s failed!" "(load \"cl\" t)"))
+(unless (load "cl-lib" t)
+  (message "%s failed!" "(load \"cl-lib\" t)"))
+(unless (load "cl-macs" t)
+  (message "%s failed!" "(load \"cl-macs\" t)"))
 
-(eval-when-compile (require 'cl))
 
 (defun noflet|base ()
   "A base function."
