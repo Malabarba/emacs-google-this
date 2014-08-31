@@ -1,6 +1,7 @@
-(require 'ert)
 (add-to-list 'load-path (expand-file-name "./"))
 (add-to-list 'load-path (expand-file-name "../"))
+
+(require 'ert)
 (require 'noflet)
 (require 'google-this)
 
@@ -49,8 +50,10 @@
 (ert-deftest google-search-test ()
   (let ((google-wrap-in-quotes nil))
     (noflet ((browse-url (url) url)
-             (google-pick-term (_) gtt--test-string))
-      (should (equal (google-search nil "foo *%s& url Tester") (format "foo *%s& url Tester" (url-hexify-string gtt--test-string)))))))
+              (google-pick-term (_) gtt--test-string))
+      (should (equal 
+                (google-search nil "foo *%s& url Tester") 
+                (format "foo *%s& url Tester" (url-hexify-string gtt--test-string)))))))
 
 ;;; Other google-something tests
 (ert-deftest google-buffer-test ()
