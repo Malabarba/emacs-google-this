@@ -202,17 +202,30 @@ Non-interactively SEARCH-STRING is the string to search."
   "Return the url for a feeling-lucky google search."
   (format "%s%s/search?q=%%s&btnI" google-base-url google-location-suffix))
 
-(defun google--do-lucky-search (term callback)
-  "Build the URL using TERM, perform the `url-retrieve' and call CALLBACK if we get redirected."
-  (url-retrieve (format (google-lucky-search-url) (url-hexify-string term))
-                (eval `(lambda (status)
-                         (if status
-                             (if (eq :redirect (car status))
-                                 (progn (message "Received URL: %s" (cadr status))
-                                        (funcall ,callback (cadr status)))
-                               (message "Unkown response: %S" status))
-                           (message "Search returned no results."))))
-                nil t t))
+(defalias 'google--do-lucky-search
+  (if (version<= emacs-version "23.4")
+      (lambda (term callback)
+        "Build the URL using TERM, perform the `url-retrieve' and call CALLBACK if we get redirected."
+        (url-retrieve (format (google-lucky-search-url) (url-hexify-string term))
+                      (eval `(lambda (status)
+                               (if status
+                                   (if (eq :redirect (car status))
+                                       (progn (message "Received URL: %s" (cadr status))
+                                              (funcall ,callback (cadr status)))
+                                     (message "Unkown response: %S" status))
+                                 (message "Search returned no results."))))
+                      nil))
+    (lambda (term callback)
+      "Build the URL using TERM, perform the `url-retrieve' and call CALLBACK if we get redirected."
+      (url-retrieve (format (google-lucky-search-url) (url-hexify-string term))
+                    (eval `(lambda (status)
+                             (if status
+                                 (if (eq :redirect (car status))
+                                     (progn (message "Received URL: %s" (cadr status))
+                                            (funcall ,callback (cadr status)))
+                                   (message "Unkown response: %S" status))
+                               (message "Search returned no results."))))
+                    nil t t))))
 
 (defvar google-this--last-url nil "Last url that was fetched by `google-lucky-and-insert-url'.")
 
