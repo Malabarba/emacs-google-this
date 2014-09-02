@@ -71,29 +71,31 @@
 ;;
 
 ;;; Change Log:
+;; 1.9   - 2014/09/02 - Renamed A LOT of functions to be namespaced correctly.
+;; 1.10  - 2014/09/02 - Fix 24.3 compatibility.
 ;; 1.9   - 2014/06/19 - Customizable URL.
-;; 1.8   - 20131031 - Customizable mode-line indicator (credit https://github.com/mgalgs)
-;; 1.7.1 - 20130917 - google-this-parse-and-search-string returns what browse-url returns.
-;; 1.7   - 20130908 - Removed some obsolete aliases.
-;; 1.7   - 20130908 - Implemented google-lucky-and-insert-url, with keybinding.
-;; 1.7   - 20130908 - Implemented google-lucky, with keybinding.
-;; 1.6   - 20130822 - Activated google-instant, so you can navigate straight for the keyboard
-;; 1.5   - 20130718 - added keybinding for google region.
-;; 1.5   - 20130718 - Fixed cpp-reference.
-;; 1.4   - 20130603 - Added parent groups.
-;; 1.4   - 20130603 - Renamed some functions and variables. Is backwards incompatible if you were using functions you shouldn't be.
-;; 1.4   - 20130603 - Fixed quoting.
-;; 1.3   - 20130531 - Merged fix for google-forecast. Thanks to ptrv.
-;; 1.3   - 20130531 - More robust google-translate command.
-;; 1.2.1 - 20130426 - Created an error parser for the google-error function.
-;; pre   - 20130227 - It works with c-like errors and is extendable to other types of errors using the varible `google-error-regexp'.
-;; 1.2.1 - 20130426 - autoloaded any functions that the user might want to call directly.
-;; 1.2   - 20130421 - Fixed docs.
-;; pre   - 20130504 - Changed the keybinding to be standards compliant.
-;; pre   - 20130303 - Fixed problem with backslash.
-;; pre   - 20130227 - Added support for google-translate and google-maps packages.
-;; pre   - 20130227 - And added `google-forecast' function.
-;; pre   - 20130227 - And added `google-location-suffix' so we're not constrained to google.com anymore.
+;; 1.8   - 2013/10/31 - Customizable mode-line indicator (credit https://github.com/mgalgs)
+;; 1.7.1 - 2013/09/17 - google-this-parse-and-search-string returns what browse-url returns.
+;; 1.7   - 2013/09/08 - Removed some obsolete aliases.
+;; 1.7   - 2013/09/08 - Implemented google-lucky-and-insert-url, with keybinding.
+;; 1.7   - 2013/09/08 - Implemented google-lucky, with keybinding.
+;; 1.6   - 2013/08/22 - Activated google-instant, so you can navigate straight for the keyboard
+;; 1.5   - 2013/07/18 - added keybinding for google region.
+;; 1.5   - 2013/07/18 - Fixed cpp-reference.
+;; 1.4   - 2013/06/03 - Added parent groups.
+;; 1.4   - 2013/06/03 - Renamed some functions and variables. Is backwards incompatible if you were using functions you shouldn't be.
+;; 1.4   - 2013/06/03 - Fixed quoting.
+;; 1.3   - 2013/05/31 - Merged fix for google-forecast. Thanks to ptrv.
+;; 1.3   - 2013/05/31 - More robust google-translate command.
+;; 1.2.1 - 2013/04/26 - Created an error parser for the google-error function.
+;; pre   - 2013/02/27 - It works with c-like errors and is extendable to other types of errors using the varible `google-error-regexp'.
+;; 1.2.1 - 2013/04/26 - autoloaded any functions that the user might want to call directly.
+;; 1.2   - 2013/04/21 - Fixed docs.
+;; pre   - 2013/05/04 - Changed the keybinding to be standards compliant.
+;; pre   - 2013/03/03 - Fixed problem with backslash.
+;; pre   - 2013/02/27 - Added support for google-translate and google-maps packages.
+;; pre   - 2013/02/27 - And added `google-forecast' function.
+;; pre   - 2013/02/27 - And added `google-location-suffix' so we're not constrained to google.com anymore.
 ;;; Code:
 
 (require 'url)
@@ -107,11 +109,12 @@
   :link '(url-link "http://github.com/Bruce-Connor/emacs-google-this")
   :group 'convenience
   :group 'comm)
+
 (defconst google-this-version "1.9"
   "Version string of the `google-this' package.")
 (defconst google-this-version-int 10
   "Integer version number of the `google-this' package (for comparing versions).")
-(defcustom google-wrap-in-quotes nil
+(defcustom google-this-wrap-in-quotes nil
   "If not nil, searches are wrapped in double quotes.
 
 If a prefix argument is given to any of the functions, the
@@ -126,56 +129,56 @@ opposite happens."
 
 (defvar google-this-mode-submap)
 (define-prefix-command 'google-this-mode-submap)
-(define-key google-this-mode-submap [return] 'google-search)
-(define-key google-this-mode-submap " " 'google-region)
+(define-key google-this-mode-submap [return] 'google-this-search)
+(define-key google-this-mode-submap " " 'google-this-region)
 (define-key google-this-mode-submap "t" 'google-this)
-(define-key google-this-mode-submap "g" 'google-lucky-search)
-(define-key google-this-mode-submap "i" 'google-lucky-and-insert-url)
-(define-key google-this-mode-submap "w" 'google-word)
-(define-key google-this-mode-submap "s" 'google-symbol)
-(define-key google-this-mode-submap "l" 'google-line)
-(define-key google-this-mode-submap "e" 'google-error)
-(define-key google-this-mode-submap "f" 'google-forecast)
-(define-key google-this-mode-submap "r" 'google-cpp-reference)
-(define-key google-this-mode-submap "m" 'google-maps)
+(define-key google-this-mode-submap "g" 'google-this-lucky-search)
+(define-key google-this-mode-submap "i" 'google-this-lucky-and-insert-url)
+(define-key google-this-mode-submap "w" 'google-this-word)
+(define-key google-this-mode-submap "s" 'google-this-symbol)
+(define-key google-this-mode-submap "l" 'google-this-line)
+(define-key google-this-mode-submap "e" 'google-this-error)
+(define-key google-this-mode-submap "f" 'google-this-forecast)
+(define-key google-this-mode-submap "r" 'google-this-cpp-reference)
+(define-key google-this-mode-submap "m" 'google-this-maps)
 ;; "c" is for "convert language" :-P
-(define-key google-this-mode-submap "c" 'google-translate-query-or-region)
+(define-key google-this-mode-submap "c" 'google-this-translate-query-or-region)
 
-(defun google-translate-query-or-region ()
-  "If region is active `google-translate-at-point', otherwise `google-translate-query-translate'."
+(defun google-this-translate-query-or-region ()
+  "If region is active `google-this-translate-at-point', otherwise `google-this-translate-query-translate'."
   (interactive)
-  (unless (require 'google-translate nil t)
-    (error "[google-this]: This command requires the 'google-translate' package"))
+  (unless (require 'google-this-translate nil t)
+    (error "[google-this]: This command requires the 'google-this-translate' package"))
   (if (region-active-p)
-      (if (functionp 'google-translate-at-point)
-          (call-interactively 'google-translate-at-point)
-        (error "[google-this]: `google-translate-at-point' function not found in `google-translate' package"))
-    (if (functionp 'google-translate-query-translate)
-        (call-interactively 'google-translate-query-translate)
-      (error "[google-this]: `google-translate-query-translate' function not found in `google-translate' package"))))
+      (if (functionp 'google-this-translate-at-point)
+          (call-interactively 'google-this-translate-at-point)
+        (error "[google-this]: `google-this-translate-at-point' function not found in `google-this-translate' package"))
+    (if (functionp 'google-this-translate-query-translate)
+        (call-interactively 'google-this-translate-query-translate)
+      (error "[google-this]: `google-this-translate-query-translate' function not found in `google-this-translate' package"))))
 
-(defcustom google-base-url "https://www.google."
+(defcustom google-this-base-url "https://www.google."
   "The base url to use in google searches.
 
-This will be appended with `google-location-suffix', so you
+This will be appended with `google-this-location-suffix', so you
 shouldn't include the final \"com\" here."
   :type 'string
   :group 'google-this)
 
-(defcustom google-location-suffix "com"
+(defcustom google-this-location-suffix "com"
   "The url suffix associated with your location (com, co.uk, fr, etc)."
   :type 'string
   :group 'google-this)
 
-(defun google-url () "URL for google searches."
-  (concat google-base-url google-location-suffix "/search?ion=1&q=%s"))
+(defun google-this-url () "URL for google searches."
+  (concat google-this-base-url google-this-location-suffix "/search?ion=1&q=%s"))
 
-(defcustom google-error-regexp '(("^[^:]*:[0-9 ]*:\\([0-9 ]*:\\)? *" ""))
+(defcustom google-this-error-regexp '(("^[^:]*:[0-9 ]*:\\([0-9 ]*:\\)? *" ""))
   "List of (REGEXP REPLACEMENT) pairs to parse error strings."
   :type '(repeat (list regexp string))
   :group 'google-this)
 
-(defun google-pick-term (prefix)
+(defun google-this-pick-term (prefix)
   "Decide what \"this\" and return it.
 PREFIX determines quoting."
   (let* ((term (if (region-active-p)
@@ -188,25 +191,25 @@ PREFIX determines quoting."
     term))
 
 ;;;###autoload
-(defun google-search (prefix &optional search-string)
+(defun google-this-search (prefix &optional search-string)
   "Write and do a google search.
 Interactively PREFIX determines quoting.
 Non-interactively SEARCH-STRING is the string to search."
   (interactive "P")
-  (let* ((term (google-pick-term prefix)))
+  (let* ((term (google-this-pick-term prefix)))
     (if (stringp term)
         (google-this-parse-and-search-string term prefix search-string)
-      (message "[google-string] Empty query."))))
+      (message "[google-this-string] Empty query."))))
 
-(defun google-lucky-search-url ()
+(defun google-this-lucky-search-url ()
   "Return the url for a feeling-lucky google search."
-  (format "%s%s/search?q=%%s&btnI" google-base-url google-location-suffix))
+  (format "%s%s/search?q=%%s&btnI" google-this-base-url google-this-location-suffix))
 
-(defalias 'google--do-lucky-search
+(defalias 'google-this--do-lucky-search
   (if (version<= emacs-version "23.4")
       (lambda (term callback)
         "Build the URL using TERM, perform the `url-retrieve' and call CALLBACK if we get redirected."
-        (url-retrieve (format (google-lucky-search-url) (url-hexify-string term))
+        (url-retrieve (format (google-this-lucky-search-url) (url-hexify-string term))
                       (eval `(lambda (status)
                                (if status
                                    (if (eq :redirect (car status))
@@ -217,7 +220,7 @@ Non-interactively SEARCH-STRING is the string to search."
                       nil))
     (lambda (term callback)
       "Build the URL using TERM, perform the `url-retrieve' and call CALLBACK if we get redirected."
-      (url-retrieve (format (google-lucky-search-url) (url-hexify-string term))
+      (url-retrieve (format (google-this-lucky-search-url) (url-hexify-string term))
                     (eval `(lambda (status)
                              (if status
                                  (if (eq :redirect (car status))
@@ -227,14 +230,14 @@ Non-interactively SEARCH-STRING is the string to search."
                                (message "Search returned no results."))))
                     nil t t))))
 
-(defvar google-this--last-url nil "Last url that was fetched by `google-lucky-and-insert-url'.")
+(defvar google-this--last-url nil "Last url that was fetched by `google-this-lucky-and-insert-url'.")
 
 ;;;###autoload
-(defun google-lucky-and-insert-url (term &optional insert)
-  "Fetch the url that would be visited by `google-lucky'.
+(defun google-this-lucky-and-insert-url (term &optional insert)
+  "Fetch the url that would be visited by `google-this-lucky'.
 
 If you just want to do an \"I'm feeling lucky search\", use
-`google-lucky-search' instead.
+`google-this-lucky-search' instead.
 
 Interactively:
 * Insert the URL at point,
@@ -260,7 +263,7 @@ Non-Interactively:
     (when (eq term 'needsQuerying)
       (setq term (read-string "Lucky Term: " (buffer-substring-no-properties l r))))
     (unless (stringp term) (error "TERM must be a string!"))
-    (google--do-lucky-search term
+    (google-this--do-lucky-search term
                              (eval `(lambda (url)
                                       (unless url (error "Received nil url"))
                                       (with-current-buffer ,b
@@ -276,16 +279,16 @@ Non-Interactively:
       google-this--last-url)))
 
 ;;;###autoload
-(defun google-lucky-search (prefix)
-  "Exactly like `google-search', but use the \"I'm feeling lucky\" option.
+(defun google-this-lucky-search (prefix)
+  "Exactly like `google-this-search', but use the \"I'm feeling lucky\" option.
 PREFIX determines quoting."
   (interactive "P")
-  (google-search prefix (google-lucky-search-url)))
+  (google-this-search prefix (google-this-lucky-search-url)))
 
 (defun google-this--maybe-wrap-in-quotes (text flip)
   "Wrap TEXT in quotes.
-Depends on the value of FLIP and `google-wrap-in-quotes'."
-  (if (if flip (not google-wrap-in-quotes) google-wrap-in-quotes)
+Depends on the value of FLIP and `google-this-wrap-in-quotes'."
+  (if (if flip (not google-this-wrap-in-quotes) google-this-wrap-in-quotes)
       (format "\"%s\"" text)
     text))
 
@@ -296,12 +299,12 @@ SEARCH-URL is usually either the regular or the lucky google
 search url.
 
 Don't call this function directly, it could change depending on
-version. Use `google-string' instead (or any of the other
-google-\"something\" functions)."
+version. Use `google-this-string' instead (or any of the other
+google-this-\"something\" functions)."
   (let* (;; Create the url
          (query-string (google-this--maybe-wrap-in-quotes text prefix))
          ;; Perform the actual search.
-         (browse-result (browse-url (format (or search-url (google-url))
+         (browse-result (browse-url (format (or search-url (google-this-url))
                                             (url-hexify-string query-string)))))
     ;; Maybe suspend emacs.
     (when google-this-suspend-after-search (suspend-frame))
@@ -309,7 +312,7 @@ google-\"something\" functions)."
     browse-result))
 
 ;;;###autoload
-(defun google-string (prefix &optional TEXT NOCONFIRM)
+(defun google-this-string (prefix &optional TEXT NOCONFIRM)
   "Google given TEXT, but ask the user first if NOCONFIRM is nil.
 PREFIX determines quoting."
   (unless NOCONFIRM
@@ -317,56 +320,56 @@ PREFIX determines quoting."
                             (if (stringp TEXT) (replace-regexp-in-string "^[[:blank:]]*" "" TEXT)))))
   (if (stringp TEXT)
       (google-this-parse-and-search-string TEXT prefix)
-    (message "[google-string] Empty query.")))
+    (message "[google-this-string] Empty query.")))
 
 ;;;###autoload
-(defun google-line (prefix)
+(defun google-this-line (prefix)
   "Google the current line.
 PREFIX determines quoting."
   (interactive "P")
   (let ((Line (buffer-substring (line-beginning-position) (line-end-position))))
-    (google-string prefix Line)))
+    (google-this-string prefix Line)))
 
 ;;;###autoload
-(defun google-word (prefix)
+(defun google-this-word (prefix)
   "Google the current word.
 PREFIX determines quoting."
   (interactive "P")
-  (google-string prefix (thing-at-point 'word) t))
+  (google-this-string prefix (thing-at-point 'word) t))
 
 ;;;###autoload
-(defun google-symbol (prefix)
+(defun google-this-symbol (prefix)
   "Google the current symbol.
 PREFIX determines quoting."
   (interactive "P")
-  (google-string prefix (thing-at-point 'symbol) t))
+  (google-this-string prefix (thing-at-point 'symbol) t))
 
 
 ;;;###autoload
-(defun google-region (prefix)
+(defun google-this-region (prefix)
   "Google the current region.
 PREFIX determines quoting."
   (interactive "P")
-  (google-string
+  (google-this-string
    prefix (buffer-substring-no-properties (region-beginning) (region-end))))
 
 ;;;###autoload
 (defun google-this (prefix)
   "Decide what the user wants to google (always something under point).
 
-Unlike `google-search' (which presents an empty prompt with
+Unlike `google-this-search' (which presents an empty prompt with
 \"this\" as the default value), this function inserts the query
 in the minibuffer to be edited.
 PREFIX determines quoting."
   (interactive "P")
   (cond
-   ((region-active-p) (google-region prefix))
-   ((thing-at-point 'symbol) (google-string prefix (thing-at-point 'symbol)))
-   ((thing-at-point 'word) (google-string prefix (thing-at-point 'word)))
-   (t (google-line prefix))))
+   ((region-active-p) (google-this-region prefix))
+   ((thing-at-point 'symbol) (google-this-string prefix (thing-at-point 'symbol)))
+   ((thing-at-point 'word) (google-this-string prefix (thing-at-point 'word)))
+   (t (google-this-line prefix))))
 
 ;;;###autoload
-(defun google-error (prefix)
+(defun google-this-error (prefix)
   "Google the current error in the compilation buffer.
 PREFIX determines quoting."
   (interactive "P")
@@ -379,7 +382,7 @@ PREFIX determines quoting."
           (buffer-name (next-error-find-buffer)))
       (unless (compilation-buffer-internal-p)
         (set-buffer buffer-name))
-      (google-string prefix
+      (google-this-string prefix
                      (google-this-clean-error-string
                       (buffer-substring (line-beginning-position) (line-end-position)))))))
 
@@ -391,26 +394,26 @@ PREFIX determines quoting."
 Removes unhelpful details like file names and line numbers from
 simple error strings (such as c-like erros).
 
-Uses replacements in `google-error-regexp' and stops at the first match."
+Uses replacements in `google-this-error-regexp' and stops at the first match."
   (interactive)
   (let (out)
     (catch 'result
-      (dolist (cur google-error-regexp out)
+      (dolist (cur google-this-error-regexp out)
         (when (string-match (car cur) s)
           (setq out (replace-regexp-in-string
                      (car cur) (car (cdr cur)) s))
           (throw 'result out))))))
 
 ;;;###autoload
-(defun google-cpp-reference ()
+(defun google-this-cpp-reference ()
   "Visit the most probable cppreference.com page for this word."
   (interactive)
   (google-this-parse-and-search-string
    (concat "site:cppreference.com " (thing-at-point 'symbol))
-   nil (google-lucky-search-url)))
+   nil (google-this-lucky-search-url)))
 
 ;;;###autoload
-(defun google-forecast (prefix)
+(defun google-this-forecast (prefix)
   "Search google for \"weather\".
 With PREFIX, ask for location."
   (interactive "P")
@@ -441,6 +444,22 @@ BEFORE activating the function `google-this-mode' and BEFORE `require'ing the
   :global t
   :group 'google-this)
 ;; (setq google-this-keybind (kbd \"C-x g\"))
+
+
+(define-obsolete-variable-alias 'google-error-regexp 'google-this-error-regexp "1.9")
+(define-obsolete-variable-alias 'google-location-suffix 'google-this-location-suffix "1.9")
+(define-obsolete-variable-alias 'google-base-url 'google-this-base-url "1.9")
+(define-obsolete-variable-alias 'google-wrap-in-quotes 'google-this-wrap-in-quotes "1.9")
+
+(dolist (it '("-do-lucky-search" "lucky-search-url" "string" "pick-term"
+              "url" "translate-query-translate" "translate-at-point"
+              "translate-query-or-region" "cpp-reference" "forecast"
+              "error" "line" "symbol" "word" "lucky-and-insert-url"
+              "lucky-search" "region" "search"))
+  (define-obsolete-function-alias
+    (intern (concat "google-" it))
+    (intern (concat "google-this-" it))
+    "1.9"))
 
 (provide 'google-this)
 
