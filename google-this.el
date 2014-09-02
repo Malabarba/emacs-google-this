@@ -141,21 +141,22 @@ opposite happens."
 (define-key google-this-mode-submap "f" 'google-this-forecast)
 (define-key google-this-mode-submap "r" 'google-this-cpp-reference)
 (define-key google-this-mode-submap "m" 'google-this-maps)
+(define-key google-this-mode-submap "m" 'google-maps)
 ;; "c" is for "convert language" :-P
 (define-key google-this-mode-submap "c" 'google-this-translate-query-or-region)
 
-(defun google-this-translate-query-or-region ()
-  "If region is active `google-this-translate-at-point', otherwise `google-this-translate-query-translate'."
+(defun translate-query-or-region ()
+  "If region is active `google-translate-at-point', otherwise `google-translate-query-translate'."
   (interactive)
-  (unless (require 'google-this-translate nil t)
-    (error "[google-this]: This command requires the 'google-this-translate' package"))
+  (unless (require 'google-translate nil t)
+    (error "[google-this]: This command requires the 'google-translate' package"))
   (if (region-active-p)
-      (if (functionp 'google-this-translate-at-point)
-          (call-interactively 'google-this-translate-at-point)
-        (error "[google-this]: `google-this-translate-at-point' function not found in `google-this-translate' package"))
-    (if (functionp 'google-this-translate-query-translate)
-        (call-interactively 'google-this-translate-query-translate)
-      (error "[google-this]: `google-this-translate-query-translate' function not found in `google-this-translate' package"))))
+      (if (functionp 'google-translate-at-point)
+          (call-interactively 'google-translate-at-point)
+        (error "[google-this]: `google-translate-at-point' function not found in `google-translate' package"))
+    (if (functionp 'google-translate-query-translate)
+        (call-interactively 'google-translate-query-translate)
+      (error "[google-this]: `google-translate-query-translate' function not found in `google-translate' package"))))
 
 (defcustom google-this-base-url "https://www.google."
   "The base url to use in google searches.
@@ -452,8 +453,7 @@ BEFORE activating the function `google-this-mode' and BEFORE `require'ing the
 (define-obsolete-variable-alias 'google-wrap-in-quotes 'google-this-wrap-in-quotes "1.9")
 
 (dolist (it '("-do-lucky-search" "lucky-search-url" "string" "pick-term"
-              "url" "translate-query-translate" "translate-at-point"
-              "translate-query-or-region" "cpp-reference" "forecast"
+              "url" "translate-query-or-region" "cpp-reference" "forecast"
               "error" "line" "symbol" "word" "lucky-and-insert-url"
               "lucky-search" "region" "search"))
   (define-obsolete-function-alias
