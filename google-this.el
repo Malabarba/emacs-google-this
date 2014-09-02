@@ -206,7 +206,7 @@ Non-interactively SEARCH-STRING is the string to search."
   (format "%s%s/search?q=%%s&btnI" google-this-base-url google-this-location-suffix))
 
 (defalias 'google-this--do-lucky-search
-  (if (version<= emacs-version "23.4")
+  (if (version< emacs-version "24")
       (lambda (term callback)
         "Build the URL using TERM, perform the `url-retrieve' and call CALLBACK if we get redirected."
         (url-retrieve (format (google-this-lucky-search-url) (url-hexify-string term))
