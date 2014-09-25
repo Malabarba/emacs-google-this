@@ -65,15 +65,23 @@
       (insert "test\nI am doing")
       (save-excursion (insert " right\nnow"))
       (setq right (point))
-      (noflet ((region-active-p () t)
-               (region-beginning () left)
-               (region-end () right)
-               (browse-url (url) url)
-               (read-string (_ def) def))
+      (noflet
+       ((region-beginning () left)
+        (region-end () right)
+        (browse-url (url) url)
+        (read-string (_ def) def))
+       (noflet
+        ((region-active-p () t))
+        (should (equal (google-this-region nil) (google-this-noconfirm nil)))
         (should (equal (google-this-region nil) (gtt--format-and-hexify "test\nI am doing")))
         (should (equal (google-this-line nil) (gtt--format-and-hexify "I am doing right")))
         (should (equal (google-this-word nil) (gtt--format-and-hexify "doing")))
-        (should (equal (google-this-symbol nil) (gtt--format-and-hexify "doing")))))))
+        (should (equal (google-this-symbol nil) (gtt--format-and-hexify "doing"))))
+       (should (equal (google-this-word nil) (google-this-noconfirm nil)))
+       (should (equal (google-this-symbol nil) (google-this-noconfirm nil)))
+       (goto-char (line-end-position))
+       (insert " ")
+       (should (equal (google-this-line nil) (google-this-noconfirm nil)))))))
 
 ;;; Local Variables:
 ;;; lisp-indent-function:common-lisp-indent-function

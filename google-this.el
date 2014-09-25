@@ -71,6 +71,7 @@
 ;;
 
 ;;; Change Log:
+;; 1.9   - 2014/09/25 - New Command: google-this-noconfirm bound to l. Like google-this but no confirmation.
 ;; 1.9   - 2014/09/02 - Renamed A LOT of functions to be namespaced correctly.
 ;; 1.10  - 2014/09/02 - Fix 24.3 compatibility.
 ;; 1.9   - 2014/06/19 - Customizable URL.
@@ -132,6 +133,7 @@ opposite happens."
 (define-key google-this-mode-submap [return] 'google-this-search)
 (define-key google-this-mode-submap " " 'google-this-region)
 (define-key google-this-mode-submap "t" 'google-this)
+(define-key google-this-mode-submap "n" 'google-this-noconfirm)
 (define-key google-this-mode-submap "g" 'google-this-lucky-search)
 (define-key google-this-mode-submap "i" 'google-this-lucky-and-insert-url)
 (define-key google-this-mode-submap "w" 'google-this-word)
@@ -313,23 +315,24 @@ google-this-\"something\" functions)."
     browse-result))
 
 ;;;###autoload
-(defun google-this-string (prefix &optional TEXT NOCONFIRM)
+(defun google-this-string (prefix &optional text noconfirm)
   "Google given TEXT, but ask the user first if NOCONFIRM is nil.
 PREFIX determines quoting."
-  (unless NOCONFIRM
-    (setq TEXT (read-string "Googling: "
-                            (if (stringp TEXT) (replace-regexp-in-string "^[[:blank:]]*" "" TEXT)))))
-  (if (stringp TEXT)
-      (google-this-parse-and-search-string TEXT prefix)
+  (unless noconfirm
+    (setq text (read-string "Googling: "
+                            (if (stringp text) (replace-regexp-in-string "^[[:blank:]]*" "" text)))))
+  (if (stringp text)
+      (google-this-parse-and-search-string text prefix)
     (message "[google-this-string] Empty query.")))
 
 ;;;###autoload
-(defun google-this-line (prefix)
+(defun google-this-line (prefix &optional noconfirm)
   "Google the current line.
-PREFIX determines quoting."
+PREFIX determines quoting.
+NOCONFIRM goes without asking for confirmation."
   (interactive "P")
-  (let ((Line (buffer-substring (line-beginning-position) (line-end-position))))
-    (google-this-string prefix Line)))
+  (let ((line (buffer-substring (line-beginning-position) (line-end-position))))
+    (google-this-string prefix line noconfirm)))
 
 ;;;###autoload
 (defun google-this-word (prefix)
@@ -347,27 +350,38 @@ PREFIX determines quoting."
 
 
 ;;;###autoload
-(defun google-this-region (prefix)
+(defun google-this-region (prefix &optional noconfirm)
   "Google the current region.
-PREFIX determines quoting."
+PREFIX determines quoting.
+NOCONFIRM goes without asking for confirmation."
   (interactive "P")
   (google-this-string
-   prefix (buffer-substring-no-properties (region-beginning) (region-end))))
+   prefix (buffer-substring-no-properties (region-beginning) (region-end))
+   noconfirm))
 
 ;;;###autoload
-(defun google-this (prefix)
+(defun google-this (prefix &optional noconfirm)
   "Decide what the user wants to google (always something under point).
-
 Unlike `google-this-search' (which presents an empty prompt with
 \"this\" as the default value), this function inserts the query
 in the minibuffer to be edited.
-PREFIX determines quoting."
+PREFIX argument determines quoting.
+NOCONFIRM goes without asking for confirmation."
   (interactive "P")
   (cond
-   ((region-active-p) (google-this-region prefix))
-   ((thing-at-point 'symbol) (google-this-string prefix (thing-at-point 'symbol)))
-   ((thing-at-point 'word) (google-this-string prefix (thing-at-point 'word)))
-   (t (google-this-line prefix))))
+   ((region-active-p) (google-this-region prefix noconfirm))
+   ((thing-at-point 'symbol) (google-this-string prefix (thing-at-point 'symbol) noconfirm))
+   ((thing-at-point 'word) (google-this-string prefix (thing-at-point 'word) noconfirm))
+   (t (google-this-line prefix noconfirm))))
+
+;;;###autoload
+(defun google-this-noconfirm (prefix)
+  "Decide what the user wants to google and go without confirmation.
+Exactly like `google-this' or `google-this-search', but don't ask
+for confirmation.
+PREFIX determines quoting."
+  (interactive "P")
+  (google-this prefix 'noconfirm))
 
 ;;;###autoload
 (defun google-this-error (prefix)
