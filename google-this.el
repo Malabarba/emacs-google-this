@@ -113,8 +113,6 @@
 
 (defconst google-this-version "1.9"
   "Version string of the `google-this' package.")
-(defconst google-this-version-int 10
-  "Integer version number of the `google-this' package (for comparing versions).")
 (defcustom google-this-wrap-in-quotes nil
   "If not nil, searches are wrapped in double quotes.
 
