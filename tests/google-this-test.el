@@ -18,14 +18,14 @@
                (region-beginning () left)
                (region-end () right)
                (read-string (_ s) s)
-               (kill-region (l r)
-                 (delete-region l r))
+               (kill-region (l r) (delete-region l r))
                ;; Make this run synchronously, no need for manual search
                (google-this--do-lucky-search (_ func)
                  (funcall func "http://www.imdb.com/title/tt0082971/")))
         (call-interactively 'google-this-lucky-and-insert-url)
         (setq google-this--last-url old-last-url)
-        (should (equal "prefix http://www.imdb.com/title/tt0082971/ suffix" (buffer-substring-no-properties (point-min) (point-max))))))))
+        (should (equal "prefix http://www.imdb.com/title/tt0082971/ suffix"
+                       (buffer-substring-no-properties (point-min) (point-max))))))))
 
 (defvar gtt--test-string "This is a test")
 (defvar gtt--base-url (google-this-url))

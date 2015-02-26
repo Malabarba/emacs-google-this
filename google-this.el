@@ -171,7 +171,8 @@ shouldn't include the final \"com\" here."
   :type 'string
   :group 'google-this)
 
-(defun google-this-url () "URL for google searches."
+(defun google-this-url ()
+  "URL for google searches."
   (concat google-this-base-url google-this-location-suffix "/search?ion=1&q=%s"))
 
 (defcustom google-this-error-regexp '(("^[^:]*:[0-9 ]*:\\([0-9 ]*:\\)? *" ""))
@@ -208,28 +209,28 @@ Non-interactively SEARCH-STRING is the string to search."
 
 (defalias 'google-this--do-lucky-search
   (if (version< emacs-version "24")
-      '(lambda (term callback)
-         "Build the URL using TERM, perform the `url-retrieve' and call CALLBACK if we get redirected."
-         (url-retrieve (format (google-this-lucky-search-url) (url-hexify-string term))
-                       (eval `(lambda (status)
-                                (if status
-                                    (if (eq :redirect (car status))
-                                        (progn (message "Received URL: %s" (cadr status))
-                                               (funcall ,callback (cadr status)))
-                                      (message "Unkown response: %S" status))
-                                  (message "Search returned no results."))))
-                       nil))
-    '(lambda (term callback)
-       "Build the URL using TERM, perform the `url-retrieve' and call CALLBACK if we get redirected."
-       (url-retrieve (format (google-this-lucky-search-url) (url-hexify-string term))
-                     (eval `(lambda (status)
-                              (if status
-                                  (if (eq :redirect (car status))
-                                      (progn (message "Received URL: %s" (cadr status))
-                                             (funcall ,callback (cadr status)))
-                                    (message "Unkown response: %S" status))
-                                (message "Search returned no results."))))
-                     nil t t))))
+      (lambda (term callback)
+        "Build the URL using TERM, perform the `url-retrieve' and call CALLBACK if we get redirected."
+        (url-retrieve (format (google-this-lucky-search-url) (url-hexify-string term))
+                      `(lambda (status)
+                         (if status
+                             (if (eq :redirect (car status))
+                                 (progn (message "Received URL: %s" (cadr status))
+                                        (funcall ,callback (cadr status)))
+                               (message "Unkown response: %S" status))
+                           (message "Search returned no results.")))
+                      nil))
+    (lambda (term callback)
+      "Build the URL using TERM, perform the `url-retrieve' and call CALLBACK if we get redirected."
+      (url-retrieve (format (google-this-lucky-search-url) (url-hexify-string term))
+                    `(lambda (status)
+                       (if status
+                           (if (eq :redirect (car status))
+                               (progn (message "Received URL: %s" (cadr status))
+                                      (funcall ,callback (cadr status)))
+                             (message "Unkown response: %S" status))
+                         (message "Search returned no results.")))
+                    nil t t))))
 
 (defvar google-this--last-url nil "Last url that was fetched by `google-this-lucky-and-insert-url'.")
 
@@ -264,16 +265,17 @@ Non-Interactively:
     (when (eq term 'needsQuerying)
       (setq term (read-string "Lucky Term: " (buffer-substring-no-properties l r))))
     (unless (stringp term) (error "TERM must be a string!"))
-    (google-this--do-lucky-search term
-                             (eval `(lambda (url)
-                                      (unless url (error "Received nil url"))
-                                      (with-current-buffer ,b
-                                        (save-excursion
-                                          (if ,nint (goto-char ,p)
-                                            (kill-region ,l ,r)
-                                            (goto-char ,l))
-                                          (when ,insert (insert url))))
-                                      (setq google-this--last-url url))))
+    (google-this--do-lucky-search
+     term
+     `(lambda (url)
+        (unless url (error "Received nil url"))
+        (with-current-buffer ,b
+          (save-excursion
+            (if ,nint (goto-char ,p)
+              (kill-region ,l ,r)
+              (goto-char ,l))
+            (when ,insert (insert url))))
+        (setq google-this--last-url url)))
     (unless nint (deactivate-mark))
     (when nint
       (while (null google-this--last-url) (sleep-for 0 10))
