@@ -208,7 +208,19 @@ Non-interactively SEARCH-STRING is the string to search."
   (format "%s%s/search?q=%%s&btnI" google-this-base-url google-this-location-suffix))
 
 (defalias 'google-this--do-lucky-search
-  (if (version< emacs-version "24")
+  (with-no-warnings
+    (if (version< emacs-version "24")
+        (lambda (term callback)
+          "Build the URL using TERM, perform the `url-retrieve' and call CALLBACK if we get redirected."
+          (url-retrieve (format (google-this-lucky-search-url) (url-hexify-string term))
+                        `(lambda (status)
+                           (if status
+                               (if (eq :redirect (car status))
+                                   (progn (message "Received URL: %s" (cadr status))
+                                          (funcall ,callback (cadr status)))
+                                 (message "Unkown response: %S" status))
+                             (message "Search returned no results.")))
+                        nil))
       (lambda (term callback)
         "Build the URL using TERM, perform the `url-retrieve' and call CALLBACK if we get redirected."
         (url-retrieve (format (google-this-lucky-search-url) (url-hexify-string term))
@@ -219,18 +231,7 @@ Non-interactively SEARCH-STRING is the string to search."
                                         (funcall ,callback (cadr status)))
                                (message "Unkown response: %S" status))
                            (message "Search returned no results.")))
-                      nil))
-    (lambda (term callback)
-      "Build the URL using TERM, perform the `url-retrieve' and call CALLBACK if we get redirected."
-      (url-retrieve (format (google-this-lucky-search-url) (url-hexify-string term))
-                    `(lambda (status)
-                       (if status
-                           (if (eq :redirect (car status))
-                               (progn (message "Received URL: %s" (cadr status))
-                                      (funcall ,callback (cadr status)))
-                             (message "Unkown response: %S" status))
-                         (message "Search returned no results.")))
-                    nil t t))))
+                      nil t t)))))
 
 (defvar google-this--last-url nil "Last url that was fetched by `google-this-lucky-and-insert-url'.")
 
