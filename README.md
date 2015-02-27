@@ -1,4 +1,4 @@
-google-this [![Build Status](https://secure.travis-ci.org/Bruce-Connor/emacs-google-this.png?branch=master)](http://travis-ci.org/Bruce-Connor/emacs-google-this) [![Melpa](http://melpa.org/packages/google-this-badge.svg)](http://melpa.org/#/google-this) [![Melpa-stable](http://stable.melpa.org/packages/google-this-badge.svg)](http://melpa.org/#/google-this)
+google-this [![Build Status](https://secure.travis-ci.org/Bruce-Connor/emacs-google-this.png?branch=master)](http://travis-ci.org/Bruce-Connor/emacs-google-this) [![Melpa](http://melpa.org/packages/google-this-badge.svg)](http://melpa.org/#/google-this) [![Melpa-stable](http://stable.melpa.org/packages/google-this-badge.svg)](http://melpa.org/#/google-this) [Gratipay](https://gratipay.com/Malabarba/)
 ------------------------
 
 **A set of emacs functions and bindings to google under point.**
