@@ -1,4 +1,4 @@
-google-this [![Build Status](https://secure.travis-ci.org/Bruce-Connor/emacs-google-this.png?branch=master)](http://travis-ci.org/Bruce-Connor/emacs-google-this) [![Donate](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=B9GT37MB4Y64E)
+google-this [![Build Status](https://secure.travis-ci.org/Bruce-Connor/emacs-google-this.png?branch=master)](http://travis-ci.org/Bruce-Connor/emacs-google-this)
 ------------------------
 
 **A set of emacs functions and bindings to google under point.**
