@@ -3,8 +3,8 @@
 ;; Copyright (C) 2012-2013 Artur Malabarba <bruce.connor.am@gmail.com>
 
 ;; Author: Artur Malabarba <bruce.connor.am@gmail.com>
-;; URL: http://github.com/Bruce-Connor/emacs-google-this
-;; Version: 1.9
+;; URL: http://github.com/Malabarba/emacs-google-this
+;; Version: 1.10
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: convenience hypermedia
 ;; Prefix: google-this
@@ -107,11 +107,11 @@
 
 (defgroup google-this '()
   "Customization group for `google-this-mode'."
-  :link '(url-link "http://github.com/Bruce-Connor/emacs-google-this")
+  :link '(url-link "http://github.com/Malabarba/emacs-google-this")
   :group 'convenience
   :group 'comm)
 
-(defconst google-this-version "1.9"
+(defconst google-this-version "1.10"
   "Version string of the `google-this' package.")
 (defcustom google-this-wrap-in-quotes nil
   "If not nil, searches are wrapped in double quotes.
