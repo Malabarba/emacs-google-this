@@ -461,21 +461,6 @@ BEFORE activating the function `google-this-mode' and BEFORE `require'ing the
   :group 'google-this)
 ;; (setq google-this-keybind (kbd \"C-x g\"))
 
-
-(define-obsolete-variable-alias 'google-error-regexp 'google-this-error-regexp "1.9")
-(define-obsolete-variable-alias 'google-location-suffix 'google-this-location-suffix "1.9")
-(define-obsolete-variable-alias 'google-base-url 'google-this-base-url "1.9")
-(define-obsolete-variable-alias 'google-wrap-in-quotes 'google-this-wrap-in-quotes "1.9")
-
-(dolist (it '("-do-lucky-search" "lucky-search-url" "string" "pick-term"
-              "url" "translate-query-or-region" "cpp-reference" "forecast"
-              "error" "line" "symbol" "word" "lucky-and-insert-url"
-              "lucky-search" "region" "search"))
-  (define-obsolete-function-alias
-    (intern (concat "google-" it))
-    (intern (concat "google-this-" it))
-    "1.9"))
-
 (provide 'google-this)
 
 ;;; google-this.el ends here
