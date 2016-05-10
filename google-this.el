@@ -137,6 +137,7 @@ opposite happens."
 (define-key google-this-mode-submap "w" 'google-this-word)
 (define-key google-this-mode-submap "s" 'google-this-symbol)
 (define-key google-this-mode-submap "l" 'google-this-line)
+(define-key google-this-mode-submap "h" 'google-this-half-line)
 (define-key google-this-mode-submap "e" 'google-this-error)
 (define-key google-this-mode-submap "f" 'google-this-forecast)
 (define-key google-this-mode-submap "r" 'google-this-cpp-reference)
@@ -336,6 +337,15 @@ NOCONFIRM goes without asking for confirmation."
     (google-this-string prefix line noconfirm)))
 
 ;;;###autoload
+(defun google-this-half-line (prefix &optional noconfirm)
+  "Google after the point.
+PREFIX determines quoting.
+NOCONFIRM goes without asking for confirmation."
+  (interactive "P")
+  (let ((line (buffer-substring (point) (line-end-position))))
+    (google-this-string prefix line noconfirm)))
+
+;;;###autoload
 (defun google-this-word (prefix)
   "Google the current word.
 PREFIX determines quoting."
@@ -348,7 +358,6 @@ PREFIX determines quoting."
 PREFIX determines quoting."
   (interactive "P")
   (google-this-string prefix (thing-at-point 'symbol) t))
-
 
 ;;;###autoload
 (defun google-this-region (prefix &optional noconfirm)
