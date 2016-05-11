@@ -126,6 +126,14 @@ opposite happens."
   :type 'boolean
   :group 'google-this)
 
+(defcustom google-this-browse-function 'browse-url
+  "Browse function to invoke. Suggestions:
+browse-url-generic
+browse-url-emacs
+eww-browse-url"
+  :type 'function
+  :group 'google-this)
+
 (defvar google-this-mode-submap)
 (define-prefix-command 'google-this-mode-submap)
 (define-key google-this-mode-submap [return] 'google-this-search)
@@ -308,8 +316,9 @@ google-this-\"something\" functions)."
   (let* (;; Create the url
          (query-string (google-this--maybe-wrap-in-quotes text prefix))
          ;; Perform the actual search.
-         (browse-result (browse-url (format (or search-url (google-this-url))
-                                            (url-hexify-string query-string)))))
+         (browse-result (funcall google-this-browse-function
+                                 (format (or search-url (google-this-url))
+                                         (url-hexify-string query-string)))))
     ;; Maybe suspend emacs.
     (when google-this-suspend-after-search (suspend-frame))
     ;; Return what browse-url returned (very usefull for tests).
