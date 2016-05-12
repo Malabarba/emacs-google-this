@@ -148,6 +148,7 @@ Possible values include: `browse-url', `browse-url-generic',
 (define-key google-this-mode-submap "f" 'google-this-forecast)
 (define-key google-this-mode-submap "r" 'google-this-cpp-reference)
 (define-key google-this-mode-submap "m" 'google-this-maps)
+(define-key google-this-mode-submap "a" 'google-this-ray)
 (define-key google-this-mode-submap "m" 'google-maps)
 ;; "c" is for "convert language" :-P
 (define-key google-this-mode-submap "c" 'google-this-translate-query-or-region)
@@ -342,6 +343,19 @@ NOCONFIRM goes without asking for confirmation."
   (interactive "P")
   (let ((line (buffer-substring (line-beginning-position) (line-end-position))))
     (google-this-string prefix line noconfirm)))
+
+;;;###autoload
+(defun google-this-ray (prefix &optional noconfirm noregion)
+  "Google text between the point and end of the line.
+If there is a selected region, googles the region.
+PREFIX determines quoting.
+NOCONFIRM goes without asking for confirmation.
+NOREGION ignores the region."
+  (interactive "P")
+  (if (and (region-active-p) (not noregion))
+      (google-this-region prefix noconfirm)
+    (let ((ray (buffer-substring (point) (line-end-position))))
+      (google-this-string prefix ray noconfirm))))
 
 ;;;###autoload
 (defun google-this-word (prefix)
