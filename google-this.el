@@ -356,8 +356,13 @@ NOREGION ignores the region."
       (google-this-region prefix noconfirm)
     (let (beg end pref (arg (prefix-numeric-value prefix)))
       (if (<= arg -1)
-          (setq beg (line-beginning-position) end (point) pref (< arg -1))
-        (setq beg (point) end (line-end-position) pref prefix))
+          (progn
+            (setq beg (line-beginning-position))
+            (setq end (point))
+            (setq pref (< arg -1)))
+        (setq beg (point))
+        (setq end (line-end-position))
+        (setq pref prefix))
       (google-this-string pref (buffer-substring beg end) noconfirm))))
 
 ;;;###autoload
