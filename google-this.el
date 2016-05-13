@@ -348,14 +348,17 @@ NOCONFIRM goes without asking for confirmation."
 (defun google-this-ray (prefix &optional noconfirm noregion)
   "Google text between the point and end of the line.
 If there is a selected region, googles the region.
-PREFIX determines quoting.
+PREFIX determines quoting. Negative arguments invert the line segment.
 NOCONFIRM goes without asking for confirmation.
 NOREGION ignores the region."
   (interactive "P")
   (if (and (region-active-p) (not noregion))
       (google-this-region prefix noconfirm)
-    (let ((ray (buffer-substring (point) (line-end-position))))
-      (google-this-string prefix ray noconfirm))))
+    (let (beg end pref (arg (prefix-numeric-value prefix)))
+      (if (<= arg -1)
+          (setq beg (line-beginning-position) end (point) pref (< arg -1))
+        (setq beg (point) end (line-end-position) pref prefix))
+      (google-this-string pref (buffer-substring beg end) noconfirm))))
 
 ;;;###autoload
 (defun google-this-word (prefix)
