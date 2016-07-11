@@ -153,7 +153,7 @@ Possible values include: `browse-url', `browse-url-generic',
 ;; "c" is for "convert language" :-P
 (define-key google-this-mode-submap "c" #'google-this-translate-query-or-region)
 
-(defun translate-query-or-region ()
+(defun google-this-translate-query-or-region ()
   "If region is active `google-translate-at-point', otherwise `google-translate-query-translate'."
   (interactive)
   (unless (require 'google-translate nil t)
