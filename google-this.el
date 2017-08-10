@@ -63,40 +63,20 @@
 ;;		(require 'google-this)
 ;;              (google-this-mode 1)
 
+;;; License:
+;;
+;; This file is NOT part of GNU Emacs.
+;;
+;; This program is free software; you can redistribute it and/or
+;; modify it under the terms of the GNU General Public License
+;; as published by the Free Software Foundation; either version 2
+;; of the License, or (at your option) any later version.
 ;;
 ;; This program is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
-;;
 
-;;; Change Log:
-;; 1.9   - 2014/09/25 - New Command: google-this-noconfirm bound to l. Like google-this but no confirmation.
-;; 1.9   - 2014/09/02 - Renamed A LOT of functions to be namespaced correctly.
-;; 1.10  - 2014/09/02 - Fix 24.3 compatibility.
-;; 1.9   - 2014/06/19 - Customizable URL.
-;; 1.8   - 2013/10/31 - Customizable mode-line indicator (credit https://github.com/mgalgs)
-;; 1.7.1 - 2013/09/17 - google-this-parse-and-search-string returns what browse-url returns.
-;; 1.7   - 2013/09/08 - Removed some obsolete aliases.
-;; 1.7   - 2013/09/08 - Implemented google-lucky-and-insert-url, with keybinding.
-;; 1.7   - 2013/09/08 - Implemented google-lucky, with keybinding.
-;; 1.6   - 2013/08/22 - Activated google-instant, so you can navigate straight for the keyboard
-;; 1.5   - 2013/07/18 - added keybinding for google region.
-;; 1.5   - 2013/07/18 - Fixed cpp-reference.
-;; 1.4   - 2013/06/03 - Added parent groups.
-;; 1.4   - 2013/06/03 - Renamed some functions and variables. Is backwards incompatible if you were using functions you shouldn't be.
-;; 1.4   - 2013/06/03 - Fixed quoting.
-;; 1.3   - 2013/05/31 - Merged fix for google-forecast. Thanks to ptrv.
-;; 1.3   - 2013/05/31 - More robust google-translate command.
-;; 1.2.1 - 2013/04/26 - Created an error parser for the google-error function.
-;; pre   - 2013/02/27 - It works with c-like errors and is extendable to other types of errors using the varible `google-error-regexp'.
-;; 1.2.1 - 2013/04/26 - autoloaded any functions that the user might want to call directly.
-;; 1.2   - 2013/04/21 - Fixed docs.
-;; pre   - 2013/05/04 - Changed the keybinding to be standards compliant.
-;; pre   - 2013/03/03 - Fixed problem with backslash.
-;; pre   - 2013/02/27 - Added support for google-translate and google-maps packages.
-;; pre   - 2013/02/27 - And added `google-forecast' function.
-;; pre   - 2013/02/27 - And added `google-location-suffix' so we're not constrained to google.com anymore.
 ;;; Code:
 
 (require 'url)
