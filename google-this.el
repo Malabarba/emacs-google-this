@@ -102,7 +102,8 @@ opposite happens."
   :group 'google-this)
 
 (defcustom google-this-suspend-after-search nil
-  "Whether Emacs should be minimized after a search is launched (calls `suspend-frame')."
+  "Whether Emacs should be minimized after a search is launched
+(calls `suspend-frame')."
   :type 'boolean
   :group 'google-this)
 
@@ -127,14 +128,13 @@ Possible values include: `browse-url', `browse-url-generic',
 (define-key google-this-mode-submap "e" #'google-this-error)
 (define-key google-this-mode-submap "f" #'google-this-forecast)
 (define-key google-this-mode-submap "r" #'google-this-cpp-reference)
-(define-key google-this-mode-submap "m" #'google-this-maps)
 (define-key google-this-mode-submap "a" #'google-this-ray)
-(define-key google-this-mode-submap "m" #'google-maps)
 ;; "c" is for "convert language" :-P
 (define-key google-this-mode-submap "c" #'google-this-translate-query-or-region)
 
 (defun google-this-translate-query-or-region ()
-  "If region is active `google-translate-at-point', otherwise `google-translate-query-translate'."
+  "If region is active `google-translate-at-point', otherwise 
+`google-translate-query-translate'."
   (interactive)
   (unless (require 'google-translate nil t)
     (error "[google-this]: This command requires the 'google-translate' package"))
