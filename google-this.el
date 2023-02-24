@@ -128,9 +128,7 @@ Possible values include: `browse-url', `browse-url-generic',
 (define-key google-this-mode-submap "e" #'google-this-error)
 (define-key google-this-mode-submap "f" #'google-this-forecast)
 (define-key google-this-mode-submap "r" #'google-this-cpp-reference)
-(define-key google-this-mode-submap "m" #'google-this-maps)
 (define-key google-this-mode-submap "a" #'google-this-ray)
-(define-key google-this-mode-submap "m" #'google-maps)
 ;; "c" is for "convert language" :-P
 (define-key google-this-mode-submap "c" #'google-this-translate-query-or-region)
 
