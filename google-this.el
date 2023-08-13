@@ -465,7 +465,7 @@ BEFORE activating the function `google-this-mode' and BEFORE `require'ing the
   :package-version '(google-this . "1.8"))
 
 ;;;###autoload
-(define-minor-mode google-this-mode nil nil google-this-modeline-indicator
+(define-minor-mode google-this-mode nil :init-value nil :lighter google-this-modeline-indicator
   `((,google-this-keybind . ,google-this-mode-submap))
   :global t
   :group 'google-this)
