@@ -129,7 +129,7 @@ Possible values include: `browse-url', `browse-url-generic',
 (define-key google-this-mode-submap "r" #'google-this-cpp-reference)
 (define-key google-this-mode-submap "m" #'google-this-maps)
 (define-key google-this-mode-submap "a" #'google-this-ray)
-(define-key google-this-mode-submap "m" #'google-maps)
+(define-key google-this-mode-submap "y" #'google-this-youtube)
 ;; "c" is for "convert language" :-P
 (define-key google-this-mode-submap "c" #'google-this-translate-query-or-region)
 
@@ -446,6 +446,31 @@ With PREFIX, ask for location."
   (if (not prefix) (google-this-parse-and-search-string "weather" nil)
     (google-this-parse-and-search-string
      (concat "weather " (read-string "Location: " nil nil "")) nil)))
+
+;;;###autoload
+(defun google-this-maps (arg)
+  "Search in Google Maps.
+With prefix ARG quote the query."
+  (interactive "P")
+  (google-this-parse-and-search-string
+   (read-string "Maps: ")
+   arg
+   (concat
+    google-this-base-url
+    google-this-location-suffix
+    "/maps/search/%s")))
+
+;;;###autoload
+(defun google-this-youtube (arg)
+  "Search in Google YouTube.
+With prefix ARG quote the query."
+  (interactive "P")
+  (google-this-parse-and-search-string
+   (read-string "YouTube: ")
+   arg
+   (concat "https://www.youtube."
+	   google-this-location-suffix
+	   "/results?search_query=%s")))
 
 (defcustom google-this-keybind (kbd "C-c /")
   "Keybinding under which `google-this-mode-submap' is assigned.
